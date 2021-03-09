@@ -59,7 +59,7 @@ function Customer() {
                       </Form.Group>
                     </Col>
                   </Row>
-                  <Row>
+                  {/* <Row>
                     <Col md="6">
                       <Form.Group>
                         <h5>เบอร์โทร</h5>
@@ -78,7 +78,7 @@ function Customer() {
                         ></Form.Control>
                       </Form.Group>
                     </Col>
-                  </Row>
+                  </Row> */}
                   <Row>
                     <Col md="3" lg="2">
                       <br></br>
