@@ -10,8 +10,10 @@
     "@fullcalendar/react": "^5.5.0",
     "@fullcalendar/timegrid": "^5.5.1",
     "antd": "^4.13.0",
+    "axios": "^0.21.1",
     "bootstrap": "4.6.0",
     "chartist": "0.10.1",
+    "formik": "^2.2.6",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "node-sass": "4.14.1",
@@ -22,7 +24,8 @@
     "react-notification-alert": "0.0.13",
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
-    "react-scripts": "4.0.1"
+    "react-scripts": "4.0.1",
+    "yup": "^0.32.9"
   },
   "optionalDependencies": {
     "jquery": "3.5.1",

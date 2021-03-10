@@ -15,42 +15,42 @@ function TableCustomer() {
       title: "รหัสลูกค้า",
       dataIndex: "code",
       key: "code",
+      width:20,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ชื่อ",
       dataIndex: "name",
       key: "name",
+      width:20,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ประเภท",
       dataIndex: "type",
       key: "type",
+      width:10,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ที่อยู่",
       dataIndex: "location",
       key: "location",
+      width:50,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "เบอร์โทร",
       dataIndex: "tel",
       key: "tel",
+      width:10,
       render: (text) => <span>{text}</span>,
-    },
-    {
-      title: "โซน",
-      dataIndex: "zone",
-      key: "zone",
-      render: (text) => <span >{text}</span>,
     },
     {
       title: "เเก้ไข",
       dataIndex: "edit",
       key: "edit",
+      width:20,
       render: (text) => <Button variant="primary" size="sm" className="font-kanit">เเก้ไข</Button>,
     },
   ];
@@ -65,7 +65,6 @@ function TableCustomer() {
       name: 'ร้านเทพรัตน์',
       location: '295 ถนน สรงประภา แขวง ดอนเมือง ดอนเมือง กรุงเทพมหานคร 10210',
       tel: '0858137775	',
-      zone: '1',
       type:'INVV',
       edit: 'เเก้ไข'
     },
@@ -75,7 +74,6 @@ function TableCustomer() {
       name: 'บริษัท ทเวนตี้โฟร์ ช้อปปิ้ง จำกัด (สำนักงานใหญ่)	',
       location: '119 อาคารธาราสาทร ชั้น9-10 ถนนสาทรใต้ แขวงทุ่งมหาเมฆ เขตสาทร กรุงเทพมหานคร 10120	',
       tel: '026482400	',
-      zone: '1',
       type:'INV',
       edit: 'เเก้ไข'
     },
@@ -85,7 +83,6 @@ function TableCustomer() {
       name: 'โยนา ชานมไข่มุก',
       location: '119 อาคารธาราสาทร ชั้น9-10 ถนนสาทรใต้ แขวงทุ่งมหาเมฆ เขตสาทร กรุงเทพมหานคร 10120	',
       tel: '0919193646',
-      zone: '2',
       type:'INV',
       edit: 'เเก้ไข'
     },
