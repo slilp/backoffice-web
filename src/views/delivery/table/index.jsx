@@ -1,49 +1,80 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { Table } from "antd";
+import { getParam } from "../../../axios";
 
-function TableDelivery() {
+const reloadData = async (search, page, size) => {
+  const res = await getParam(`/purchase/search/${page}/${size}/`, {
+    name: search.sName || "",
+    pid: search.sCode || "",
+    transportType: search.sType || "",
+  });
+  if (res.status == 200) {
+    if (res.data.data.rows != null) {
+      let data = res.data.data.rows.map((item) => {
+        return {
+          key: item.pid,
+          code: item.pid,
+          name: item.customerInfo.name,
+          location: item.customerInfo.location,
+          deliveryLocation : item.transportLocation || ' - ',
+          type : item.transportType == "self" ? 'ส่งเอง' : 'ส่งที่ขนส่ง' ,
+          edit: 'เเก้ไข'
+        };
+      });
+
+      return { list: data, total: res.data.data.count };
+    } else {
+      return [];
+    }
+  }
+};
+
+function TableDelivery({ sCode, sName, sType }) {
+  const [dataSource, setDataSource] = useState([]);
+  const [pagination, setPagination] = useState();
+
   const columns = [
     {
       title: "รหัสการสั่งซื้อ",
       dataIndex: "code",
       key: "code",
-      width:20,
+      width: 20,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ชื่อลูกค้า",
       dataIndex: "name",
       key: "name",
-      width:20,
+      width: 20,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ที่อยู่จัดส่ง",
       dataIndex: "location",
       key: "location",
-      width:100,
+      width: 100,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "ที่อยู่ขนส่ง",
       dataIndex: "deliveryLocation",
       dataIndex: "deliveryLocation",
-      width:100,
+      width: 100,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "วิธีการจัดส่ง",
       dataIndex: "type",
       key: "type",
-      width:10,
+      width: 10,
       render: (text) => <span>{text}</span>,
     },
     {
       title: "เเก้ไข",
       dataIndex: "edit",
       key: "edit",
-      width:20,
+      width: 20,
       render: (text) => (
         <Button variant="primary" size="sm" className="font-kanit">
           เเก้ไข
@@ -52,41 +83,30 @@ function TableDelivery() {
     },
   ];
 
-  const handleTableChange = async (pagination, filters, sorter) => {};
+  useEffect(async () => {
+    const res = await reloadData({ sCode, sName, sType }, 0, 10);
+    setDataSource(res.list);
+    setPagination({
+      total: res.total - 1,
+      current: 1,
+      indentSize: 10,
+      showSizeChanger: false,
+    });
+  }, [sCode, sName, sType]);
 
-  const onChangeChannel = async (e) => {};
-  const dataSource = [
-    {
-      key: "1",
-      code: "SO0001",
-      name: "ร้านเทพรัตน์",
-      location: "295 ถนน สรงประภา แขวง ดอนเมือง ดอนเมือง กรุงเทพมหานคร 10210",
-     deliveryLocation:''  || '-',
-      type: "จัดส่งเอง",
-      edit: "เเก้ไข",
-    },
-    {
-      key: "2",
-      code: "SO0002",
-      name: "บริษัท ทเวนตี้โฟร์ ช้อปปิ้ง จำกัด (สำนักงานใหญ่)	",
-      location:
-        "119 อาคารธาราสาทร ชั้น9-10 ถนนสาทรใต้ แขวงทุ่งมหาเมฆ เขตสาทร กรุงเทพมหานคร 10120	",
-      deliveryLocation:'' || '-',
-      type: "จัดส่งเอง",
-      edit: "เเก้ไข",
-    },
-    {
-      key: "3",
-      code: "SO0003",
-      name: "โยนา ชานมไข่มุก",
-      location:
-        "119 อาคารธาราสาทร ชั้น9-10 ถนนสาทรใต้ แขวงทุ่งมหาเมฆ เขตสาทร กรุงเทพมหานคร 10120	",
-      deliveryLocation:'สายใต้ใหม่ แขวงทุ่งมหาเมฆ เขตสาทร กรุงเทพมหานคร 10120',
-      type: "ส่งที่ขนส่ง",
-      edit: "เเก้ไข",
-    },
-  ];
-
+  const handleTableChange = async (pagination, filters, sorter) => {
+    const res = await reloadData(
+      { sCode, sName, sType },
+      pagination.current - 1,
+      pagination.pageSize
+    );
+    setDataSource(res.list);
+    setPagination({
+      ...pagination,
+      current: pagination.current,
+    });
+  };
+  
   return (
     <>
       <Col md="12">
@@ -101,9 +121,10 @@ function TableDelivery() {
           </Card.Header>
           <Card.Body className="table-full-width table-responsive px-0">
             <Table
-              columns={columns}
-              dataSource={dataSource}
-              onChange={handleTableChange}
+                 columns={columns}
+                 dataSource={dataSource}
+                 pagination={pagination}
+                 onChange={handleTableChange}
             />
           </Card.Body>
         </Card>

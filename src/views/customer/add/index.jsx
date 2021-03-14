@@ -4,12 +4,13 @@ import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { postJson } from "../../../axios";
-import {  message } from "antd";
+import { message } from "antd";
 
 const SignupSchema = Yup.object().shape({
   code: Yup.string().required("กรุณากรอกข้อมูล"),
   name: Yup.string().required("กรุณากรอกข้อมูล"),
   tel: Yup.string().required("กรุณากรอกข้อมูล"),
+  email: Yup.string().required("กรุณากรอกข้อมูล"),
   location: Yup.string().required("กรุณากรอกข้อมูล"),
 });
 
@@ -17,25 +18,22 @@ function AddCustomer() {
   let history = useHistory();
 
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
-    
     setSubmitting(true);
-    
-    const response = await postJson('/customer/add',{
-      "cid" : values.code,
-      "name" : values.name,
-      "type" : values.type,
-      "tel" : values.tel ,
-      // "email" : "test@email.com",
-      "location" : values.location,
-      "deliveryLocation" : values.locationDeliver,
+    const response = await postJson("/customer/add", {
+      cid: values.code,
+      name: values.name,
+      type: values.type,
+      tel: values.tel,
+      email: values.email,
+      location: values.location,
+      deliveryLocation: values.locationDeliver,
     });
 
-    
-    if(response.status == 200){
+    if (response.status == 200) {
       setSubmitting(false);
       message.success("เพิ่มข้อมูลสำเร็จ", 3);
       history.push("/admin/user");
-    }else{
+    } else {
       setSubmitting(false);
       message.error("การทำรายการไม่สำเร็จ", 3);
     }
@@ -55,10 +53,11 @@ function AddCustomer() {
                   initialValues={{
                     code: "",
                     name: "",
-                    type: "",
+                    type: "INN",
                     tel: "",
                     location: "",
                     locationDeliver: "",
+                    email:""
                   }}
                   validationSchema={SignupSchema}
                   onSubmit={submitAdd}
@@ -82,7 +81,7 @@ function AddCustomer() {
                               type="text"
                               name="code"
                               onChange={handleChange}
-                              value={values.code}
+                              value={"CS" + values.code}
                             ></Form.Control>
                             {errors.code && touched.code ? (
                               <span className="text-danger">{errors.code}</span>
@@ -136,6 +135,20 @@ function AddCustomer() {
                             ></Form.Control>
                             {errors.tel && touched.tel ? (
                               <span className="text-danger">{errors.tel}</span>
+                            ) : null}
+                          </Form.Group>
+                        </Col>
+                        <Col md="6">
+                          <Form.Group>
+                            <h5>อีเมล</h5>
+                            <Form.Control
+                              type="text"
+                              name="email"
+                              onChange={handleChange}
+                              value={values.email}
+                            ></Form.Control>
+                            {errors.tel && touched.tel ? (
+                              <span className="text-danger">{errors.email}</span>
                             ) : null}
                           </Form.Group>
                         </Col>

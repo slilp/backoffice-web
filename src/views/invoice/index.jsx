@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   Container,
@@ -10,9 +10,32 @@ import {
 } from "react-bootstrap";
 import TableInvoice from "./table";
 import { useHistory } from "react-router-dom";
+import { Formik } from "formik";
 
 function Invoice() {
   let history = useHistory();
+
+  const [search, setSearch] = useState({
+    sInv: "",
+    sPid: "",
+    sStatus: "",
+    sStartDate: "",
+    sEndDate: "",
+  });
+
+  const submitSearch = (values, { setSubmitting, resetForm }) => {
+    setSubmitting(true);
+    setSearch({
+      ...search,
+      sInv: values.inv,
+      sPid: values.pid,
+      sStatus: values.status,
+      sStartDate: values.startDate,
+      sEndDate: values.endDate
+    });
+    setSubmitting(false);
+  };
+
 
   return (
     <div>
@@ -52,14 +75,36 @@ function Invoice() {
                 <Card.Title as="h4">ค้นหาการชำระเงินเเละการจัดส่ง</Card.Title>
               </Card.Header>
               <Card.Body>
-                <Form>
-                  <Row>
+              <Formik
+                  initialValues={{
+                    inv: "",
+                    pid: "",
+                    status: "",
+                    startDate: "",
+                    endDate: "",
+                  }}
+                  onSubmit={submitSearch}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    isSubmitting,
+                    resetForm,
+                  }) => (
+                    <Form onSubmit={handleSubmit}>                  <Row>
                     <Col md="5">
                       <Form.Group>
                         <h5>รหัสใบเสร็จ</h5>
                         <Form.Control
                           placeholder="INVxxxxx"
                           type="text"
+                          name="inv"
+                          onChange={handleChange}
+                          value={values.inv}
                         ></Form.Control>
                       </Form.Group>
                     </Col>
@@ -69,6 +114,9 @@ function Invoice() {
                         <Form.Control
                           placeholder="SOxxxxxx"
                           type="text"
+                          name="pid"
+                          onChange={handleChange}
+                          value={values.pid}
                         ></Form.Control>
                       </Form.Group>
                     </Col>
@@ -77,9 +125,17 @@ function Invoice() {
                     <Col md="5">
                       <Form.Group>
                         <h5>สถานะการรับเงิน</h5>
-                        <Form.Control type="text" size="sm" as="select">
-                          <option>รอการชำระเงิน</option>
-                          <option>ได้รับเงินเเล้ว</option>
+                        <Form.Control 
+                        type="text" 
+                        size="sm" 
+                        as="select"
+                        name="status"
+                        onChange={handleChange}
+                        value={values.status}
+                        defaultValue="waiting"
+                        >
+                          <option value="waiting">รอการชำระเงิน</option>
+                          <option value="success">ได้รับเงินเเล้ว</option>
                         </Form.Control>
                       </Form.Group>
                     </Col>
@@ -116,7 +172,28 @@ function Invoice() {
                         ค้นหารายการ
                       </Button>
                     </Col>
-                    <Col md="4" lg="2">
+                    <Col md="3" lg="2">
+                          <br></br>
+                          <Button
+                            className="btn-fill pull-right"
+                            variant="info"
+                            onClick={() => {
+                              resetForm();
+                              setSearch({
+                                ...search,
+                                sInv: "",
+                                sPid: "",
+                                sStatus: "",
+                                sStartDate: "",
+                                sEndDate: ""
+                              });
+                            }}
+                          >
+                            <i className="fas fa-reply mr-1"></i>
+                            ล้างการค้นหา
+                          </Button>
+                        </Col>
+                    <Col md="3" lg="2">
                       <br></br>
                       <Button
                         className="btn-fill pull-right"
@@ -131,12 +208,20 @@ function Invoice() {
                   </Row>
 
                   <div className="clearfix"></div>
-                </Form>
+                  </Form>
+                  )}
+                </Formik>
               </Card.Body>
             </Card>
           </Col>
           <Col md="12">
-            <TableInvoice></TableInvoice>
+            <TableInvoice
+                      sInv={search.sInv}
+                      sPid={search.sPid}
+                      sStatus={search.sStatus}
+                      sStartDate={search.sStartDate}
+                      sEndDate={search.sEndDate}
+            ></TableInvoice>
           </Col>
         </Row>
       </Container>
