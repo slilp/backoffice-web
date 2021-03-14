@@ -8,60 +8,76 @@ import {
   Form,
   Button,
 } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { postJson , getParam } from "../../../axios";
+import { postJson, getParam, putJson } from "../../../axios";
 import { Select, Radio, message } from "antd";
 
 const AddSchema = Yup.object().shape({
   code: Yup.string().required("กรุณากรอกข้อมูล"),
-  cname: Yup.string().required("กรุณากรอกข้อมูล")
-  .notOneOf([Yup.ref("ไม่พบข้อมูล")], "กรุณาเลือกข้อมูลที่ถูกต้อง"),
-  cid: Yup.string().required("กรุณากรอกข้อมูล")
-  .notOneOf([Yup.ref("ไม่พบข้อมูล")], "กรุณาเลือกข้อมูลที่ถูกต้อง"),
-  location: Yup.string().required("กรุณากรอกข้อมูล")
-  .notOneOf([Yup.ref("ไม่พบข้อมูล")], "กรุณาเลือกข้อมูลที่ถูกต้อง"),
+  cname: Yup.string()
+    .required("กรุณากรอกข้อมูล"),
+  cid: Yup.string()
+    .required("กรุณากรอกข้อมูล"),
+  location: Yup.string()
+    .required("กรุณากรอกข้อมูล")
 });
 
-const searchTransaction = async (search) => {
-  const res = await getParam(`/purchase/search/0/1`, {
-    pid: search || "",
-  });
-  if (res.status == 200) {
-    if (res.data.data.count != 0) {
-      const customer = await getParam(`/customer/info/${res.data.data.rows[0].customerInfo.cid}`, {});
-      if(customer.status == 200){
-        return customer.data.data
-      }else{
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
+function AddDelivery() {
+  let history = useHistory();
+  let query = useQuery();
+  const [openOption, setOpenOption] = useState(false);
+  const [transportType, setTransportType] = useState("self");
+  const [selectTrans, setSelectTrans] = useState({});
+  const defaultPid = query.get("pid");
+
+  const searchTransaction = async (search) => {
+    const res = await getParam(`/purchase/search/0/1`, {
+      pid: search || "",
+    });
+    if (res.status == 200) {
+      if (res.data.data.count != 0) {
+        setSelectTrans(res.data.data.rows[0]);
+
+        const customer = await getParam(
+          `/customer/info/${res.data.data.rows[0].customerInfo.cid}`,
+          {}
+        );
+        if (customer.status == 200) {
+          return customer.data.data;
+        } else {
+          return null;
+        }
+      } else {
         return null;
       }
     } else {
       return null;
     }
-  } else {
-    return null;
-  }
-};
-
-function AddDelivery() {
-  let history = useHistory();
-  const [openOption, setOpenOption] = useState(false);
-  const [transportType, setTransportType] = useState("self");
+  };
 
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
-    const response = await postJson("/purchase/add", {
-      pid: values.code,
+    const response = await putJson(`/purchase/update/${values.code}`, {
+      sale: values.code,
       revenue: values.revenue,
-      sale: values.sale,
-      cid: values.cid,
+      transportType: transportType,
+      transportName: values.transportName,
+      transportLocation: values.transportLocation,
+      note: values.note,
+      sale: selectTrans.sale,
+      revenue: selectTrans.revenue,
     });
 
     if (response.status == 200) {
       setSubmitting(false);
       message.success("เพิ่มข้อมูลสำเร็จ", 3);
-      history.push("/admin/production");
+      history.push("/admin/delivery");
     } else {
       setSubmitting(false);
       message.error("การทำรายการไม่สำเร็จ", 3);
@@ -75,21 +91,21 @@ function AddDelivery() {
 
   const autoCompleteCustomer = async (e, handleChange, setFieldValue) => {
     handleChange(e);
-    console.log(e.target.value);
+
     if (e.target.value.length > 5) {
       const customerInfo = await searchTransaction(e.target.value);
-      console.log(JSON.stringify(customerInfo));
-      if(customerInfo){
+
+      if (customerInfo) {
         setFieldValue("cid", customerInfo.cid);
         setFieldValue("cname", customerInfo.name);
         setFieldValue("transportLocation", customerInfo.deliveryLocation);
         setFieldValue("location", customerInfo.location);
-      }else{
+      } else {
         setFieldValue("cid", "ไม่พบข้อมูล");
         setFieldValue("cname", "ไม่พบข้อมูล");
         setFieldValue("location", "ไม่พบข้อมูล");
       }
-    } else{
+    } else {
       setFieldValue("cid", "");
       setFieldValue("cname", "");
       setFieldValue("transportLocation", "");
@@ -116,7 +132,7 @@ function AddDelivery() {
                     transportName: "",
                     transportLocation: "",
                     note: "",
-                    location:""
+                    location: "",
                   }}
                   validationSchema={AddSchema}
                   onSubmit={submitAdd}
@@ -140,7 +156,13 @@ function AddDelivery() {
                               placeholder="รหัสการสั่งซื้อ"
                               type="text"
                               name="code"
-                              onChange={(e)=>autoCompleteCustomer(e,handleChange,setFieldValue)}
+                              onChange={(e) =>
+                                autoCompleteCustomer(
+                                  e,
+                                  handleChange,
+                                  setFieldValue
+                                )
+                              }
                               value={values.code}
                             ></Form.Control>
                             {errors.code && touched.code ? (
@@ -180,9 +202,7 @@ function AddDelivery() {
                               readOnly
                             ></Form.Control>
                             {errors.cid && touched.cid ? (
-                              <span className="text-danger">
-                                {errors.cid}
-                              </span>
+                              <span className="text-danger">{errors.cid}</span>
                             ) : null}
                           </Form.Group>
                         </Col>

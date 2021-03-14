@@ -21,7 +21,6 @@ const AddSchema = Yup.object().shape({
   cid: Yup.string().required("กรุณากรอกข้อมูล"),
   cname: Yup.string()
     .required("กรุณากรอกข้อมูล")
-    .notOneOf([Yup.ref("not")], "กรุณาเลือกลูกค้าที่ถูกต้อง"),
 });
 
 const searchCustomer = async (search) => {
@@ -46,16 +45,35 @@ function AddProduction() {
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     const response = await postJson("/purchase/add", {
-      pid: `SO${values.code}`,
+      pid: `${values.code}`,
       revenue: values.revenue,
       sale: values.sale,
-      cid: `CS${values.cid}`,
+      cid: `${values.cid}`,
     });
 
     if (response.status == 200) {
       setSubmitting(false);
       message.success("เพิ่มข้อมูลสำเร็จ", 3);
       history.push("/admin/production");
+    } else {
+      setSubmitting(false);
+      message.error("การทำรายการไม่สำเร็จ", 3);
+    }
+  };
+
+  const addFormWithRedirect = async (values,setSubmitting, resetForm) => {
+    setSubmitting(true);
+    const response = await postJson("/purchase/add", {
+      pid: `${values.code}`,
+      revenue: values.revenue,
+      sale: values.sale,
+      cid: `${values.cid}`,
+    });
+
+    if (response.status == 200) {
+      setSubmitting(false);
+      message.success("เพิ่มข้อมูลสำเร็จ", 3);
+      history.push("/admin/addd");
     } else {
       setSubmitting(false);
       message.error("การทำรายการไม่สำเร็จ", 3);
@@ -103,6 +121,8 @@ function AddProduction() {
                     handleSubmit,
                     isSubmitting,
                     setFieldValue,
+                    setSubmitting,
+                    resetForm
                   }) => (
                     <Form onSubmit={handleSubmit}>
                       <Row>
@@ -218,7 +238,7 @@ function AddProduction() {
                             type="submit"
                             variant="primary"
                             disabled={isSubmitting}
-                            // onClick={() => history.push("/admin/addd")}
+                            onClick={(e) => addFormWithRedirect(values,setSubmitting, resetForm)}
                           >
                             <i className="fas fa-forward mr-1"></i>
                             ทำข้อมูลขนส่งต่อ

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import {
   Table,
   Container,
@@ -11,9 +11,14 @@ import {
 import TableInvoice from "./table";
 import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
+import { getParam } from "../../axios";
 
 function Invoice() {
   let history = useHistory();
+  const [waitingAmount,setWaitingAmount] = useState(0);
+  var today = new Date();
+  var date = today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear() ;
+  var time = today.getHours()+':'+today.getMinutes();
 
   const [search, setSearch] = useState({
     sInv: "",
@@ -23,6 +28,11 @@ function Invoice() {
     sEndDate: "",
   });
 
+  useEffect(async ()=>{
+    const waitingRevenue  = await getParam("/invoice/sum/waiting");
+    setWaitingAmount(waitingRevenue.data.data);
+  },[]);  
+
   const submitSearch = (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     setSearch({
@@ -31,11 +41,10 @@ function Invoice() {
       sPid: values.pid,
       sStatus: values.status,
       sStartDate: values.startDate,
-      sEndDate: values.endDate
+      sEndDate: values.endDate,
     });
     setSubmitting(false);
   };
-
 
   return (
     <div>
@@ -53,7 +62,7 @@ function Invoice() {
                   <Col xs="7">
                     <div className="numbers">
                       <p className="card-category font-kanit">ยอดเงินรอเก็บ</p>
-                      <Card.Title as="h4">1,345</Card.Title>
+                      <Card.Title as="h4">{waitingAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Card.Title>
                     </div>
                   </Col>
                 </Row>
@@ -62,7 +71,7 @@ function Invoice() {
                 <hr></hr>
                 <div className="stats">
                   <i className="far fa-calendar-alt mr-1"></i>
-                  อัพเดท 27-02-2021
+                  อัพเดท {date} {time}
                 </div>
               </Card.Footer>
             </Card>
@@ -75,7 +84,7 @@ function Invoice() {
                 <Card.Title as="h4">ค้นหาการชำระเงินเเละการจัดส่ง</Card.Title>
               </Card.Header>
               <Card.Body>
-              <Formik
+                <Formik
                   initialValues={{
                     inv: "",
                     pid: "",
@@ -95,52 +104,53 @@ function Invoice() {
                     isSubmitting,
                     resetForm,
                   }) => (
-                    <Form onSubmit={handleSubmit}>                  <Row>
-                    <Col md="5">
-                      <Form.Group>
-                        <h5>รหัสใบเสร็จ</h5>
-                        <Form.Control
-                          placeholder="INVxxxxx"
-                          type="text"
-                          name="inv"
-                          onChange={handleChange}
-                          value={values.inv}
-                        ></Form.Control>
-                      </Form.Group>
-                    </Col>
-                    <Col md="5">
-                      <Form.Group>
-                        <h5>รหัสการสั่งซื้อ</h5>
-                        <Form.Control
-                          placeholder="SOxxxxxx"
-                          type="text"
-                          name="pid"
-                          onChange={handleChange}
-                          value={values.pid}
-                        ></Form.Control>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md="5">
-                      <Form.Group>
-                        <h5>สถานะการรับเงิน</h5>
-                        <Form.Control 
-                        type="text" 
-                        size="sm" 
-                        as="select"
-                        name="status"
-                        onChange={handleChange}
-                        value={values.status}
-                        defaultValue="waiting"
-                        >
-                          <option value="waiting">รอการชำระเงิน</option>
-                          <option value="success">ได้รับเงินเเล้ว</option>
-                        </Form.Control>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                  <Row>
+                    <Form onSubmit={handleSubmit}>
+                      <Row>
+                        <Col md="5">
+                          <Form.Group>
+                            <h5>รหัสใบเสร็จ</h5>
+                            <Form.Control
+                              placeholder="INVxxxxx"
+                              type="text"
+                              name="inv"
+                              onChange={handleChange}
+                              value={values.inv}
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                        <Col md="5">
+                          <Form.Group>
+                            <h5>รหัสการสั่งซื้อ</h5>
+                            <Form.Control
+                              placeholder="SOxxxxxx"
+                              type="text"
+                              name="pid"
+                              onChange={handleChange}
+                              value={values.pid}
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md="5">
+                          <Form.Group>
+                            <h5>สถานะการรับเงิน</h5>
+                            <Form.Control
+                              type="text"
+                              size="sm"
+                              as="select"
+                              name="status"
+                              onChange={handleChange}
+                              value={values.status}
+                              defaultValue="waiting"
+                            >
+                              <option value="waiting">รอการชำระเงิน</option>
+                              <option value="success">ได้รับเงินเเล้ว</option>
+                            </Form.Control>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      {/* <Row>
                     <Col md="5">
                       <Form.Group>
                         <h5>รอบจากวันที่</h5>
@@ -159,20 +169,20 @@ function Invoice() {
                         ></Form.Control>
                       </Form.Group>
                     </Col>
-                  </Row>
-                  <Row>
-                    <Col md="3" lg="2">
-                      <br></br>
-                      <Button
-                        className="btn-fill pull-right"
-                        type="submit"
-                        variant="primary"
-                      >
-                        <i className="fas fa-search-plus mr-1"></i>
-                        ค้นหารายการ
-                      </Button>
-                    </Col>
-                    <Col md="3" lg="2">
+                  </Row> */}
+                      <Row>
+                        <Col md="3" lg="2">
+                          <br></br>
+                          <Button
+                            className="btn-fill pull-right"
+                            type="submit"
+                            variant="primary"
+                          >
+                            <i className="fas fa-search-plus mr-1"></i>
+                            ค้นหารายการ
+                          </Button>
+                        </Col>
+                        <Col md="3" lg="2">
                           <br></br>
                           <Button
                             className="btn-fill pull-right"
@@ -185,7 +195,7 @@ function Invoice() {
                                 sPid: "",
                                 sStatus: "",
                                 sStartDate: "",
-                                sEndDate: ""
+                                sEndDate: "",
                               });
                             }}
                           >
@@ -193,22 +203,21 @@ function Invoice() {
                             ล้างการค้นหา
                           </Button>
                         </Col>
-                    <Col md="3" lg="2">
-                      <br></br>
-                      <Button
-                        className="btn-fill pull-right"
-                        type="submit"
-                        variant="warning"
-                        onClick={() => history.push("/admin/addi")}
-                      >
-                        <i className="far fa-plus-square mr-1"></i>
-                        เพิ่มรายการใหม่
-                      </Button>
-                    </Col>
-                  </Row>
-
-                  <div className="clearfix"></div>
-                  </Form>
+                        <Col md="3" lg="2">
+                          <br></br>
+                          <Button
+                            className="btn-fill pull-right"
+                            type="submit"
+                            variant="warning"
+                            onClick={() => history.push("/admin/addi")}
+                          >
+                            <i className="far fa-plus-square mr-1"></i>
+                            เพิ่มรายการใหม่
+                          </Button>
+                        </Col>
+                      </Row>
+                      <div className="clearfix"></div>
+                    </Form>
                   )}
                 </Formik>
               </Card.Body>
@@ -216,11 +225,11 @@ function Invoice() {
           </Col>
           <Col md="12">
             <TableInvoice
-                      sInv={search.sInv}
-                      sPid={search.sPid}
-                      sStatus={search.sStatus}
-                      sStartDate={search.sStartDate}
-                      sEndDate={search.sEndDate}
+              sInv={search.sInv}
+              sPid={search.sPid}
+              sStatus={search.sStatus}
+              sStartDate={search.sStartDate}
+              sEndDate={search.sEndDate}
             ></TableInvoice>
           </Col>
         </Row>

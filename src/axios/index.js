@@ -5,12 +5,31 @@ const API_URL = "http://localhost:5000/api";
 async function postJson(url, req) {
     try {
 
-        console.log(req);
         const headers = {
             'Content-Type': 'application/json',
         }
 
         const res = await axios.post(
+            API_URL + url, req, {
+                headers: headers
+            }
+        );
+
+        return res;
+
+    } catch (error) {
+        return error.response;
+    }
+}
+
+async function putJson(url, req) {
+    try {
+
+        const headers = {
+            'Content-Type': 'application/json',
+        }
+
+        const res = await axios.put(
             API_URL + url, req, {
                 headers: headers
             }
@@ -40,5 +59,6 @@ async function getParam(url, req) {
 
 export {
     postJson,
-    getParam
+    getParam,
+    putJson
 }

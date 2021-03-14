@@ -81,7 +81,7 @@ function AddCustomer() {
                               type="text"
                               name="code"
                               onChange={handleChange}
-                              value={"CS" + values.code}
+                              value={values.code}
                             ></Form.Control>
                             {errors.code && touched.code ? (
                               <span className="text-danger">{errors.code}</span>

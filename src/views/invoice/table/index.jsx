@@ -8,7 +8,6 @@ import { searchData } from "./service";
 function TableInvoice({ sInv, sPid, sStatus, sStartDate, sEndDate }) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
-  const columnsTable = columns;
   const reloadData = searchData;
 
   useEffect(async () => {

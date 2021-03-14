@@ -1,39 +1,40 @@
 import { Button } from "react-bootstrap";
+import moment from "moment";
 
 export const columns = [
   {
     title: "รหัสใบเสร็จ",
     dataIndex: "invoiceCode",
     key: "invoiceCode",
-    width: 25,
+    width: 10,
     render: (text) => <span>{text}</span>,
   },
   {
     title: "รหัสสั่งซื้อ",
     dataIndex: "pid",
     key: "pid",
-    width: 25,
+    width: 10,
     render: (text) => <span>{text}</span>,
   },
   {
     title: "ชื่อลูกค้า",
     dataIndex: "name",
     key: "name",
-    width: 25,
+    width: 200,
     render: (text) => <span>{text}</span>,
   },
   {
     title: "รอบการชำระเงิน",
     dataIndex: "pay",
     key: "pay",
-    width: 25,
-    render: (text) => <span>{text}</span>,
+    width: 20,
+    render: (text) => <span>{moment(text).format('DD-MM-YYYY')}</span>,
   },
   {
     title: "จำนวนเงิน",
     dataIndex: "amount",
     dataIndex: "amount",
-    width: 25,
+    width: 10,
     render: (text) => <span>{text}</span>,
   },
   {
