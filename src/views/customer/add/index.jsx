@@ -1,10 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { postJson } from "../../../axios";
-import { message } from "antd";
+import { Select, message } from "antd";
+const { Option } = Select;
+
+const provinceData = ["กรุงเทพ", "นนทบุรี"];
+const cityData = {
+  กรุงเทพ: ["บางซื่อ", "บางซ่อน", "ดุสิต"],
+  นนทบุรี: ["เยาวราช", "สีลม", "พญาไท"],
+};
+const districtData = {
+  บางซื่อ: ["วงศ์สว่าง"],
+  ดุสิต: ["rrr"],
+  บางซ่อน: ["พรุดินนา"],
+  เยาวราช: ["ทรายขาว","ทรายเขียว"],
+  สีลม:["ddddd"],
+  พญาไท:["qqqqq"]
+};
+const zipCodeData = {
+  วงศ์สว่าง: ["10800"],
+  พรุดินนา: ["811ggdfdssds70"],
+  ทรายขาว: ["ขาวววว","จ้าาาา"],
+  ทรายเขียว: ["เขียวว"],
+  rrr:["dddddd"],
+  ddddd :["wwwww"],
+  qqqqq:["iiii"]
+};
+
+
 
 const SignupSchema = Yup.object().shape({
   code: Yup.string().required("กรุณากรอกข้อมูล"),
@@ -16,6 +42,12 @@ const SignupSchema = Yup.object().shape({
 
 function AddCustomer() {
   let history = useHistory();
+  const [cities, setCities] = useState(cityData[provinceData[0]]);
+  const [secondCity, setSecondCity] = useState(cityData[provinceData[0]]);
+  const [secondCityList,setSecondCityList] = useState(districtData[cityData[provinceData[0]][0]]);
+  const [thirdCity, setThirdCity] = useState(districtData[cityData[provinceData[0]][0]][0]);
+  const [thirdCityList, setThirdCityList] = useState(zipCodeData[districtData[cityData[provinceData[0]][0]][0]]);
+  const [forthCity, setForthCity] = useState(zipCodeData[districtData[cityData[provinceData[0]][0]][0]][0]);
 
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
@@ -39,6 +71,33 @@ function AddCustomer() {
     }
   };
 
+  const handleProvinceChange = (value) => {
+    setCities(cityData[value]);
+    setSecondCity(cityData[value][0]);
+    setSecondCityList(districtData[cityData[value][0]]);
+    setThirdCity(districtData[cityData[value][0]][0]);
+    setThirdCityList(zipCodeData[districtData[cityData[value][0]][0]]);
+    setForthCity(zipCodeData[districtData[cityData[value][0]][0]][0]);
+  };
+
+  const onSecondCityChange = (value) => {
+    setSecondCity(value);
+    setSecondCityList(districtData[value]);
+    setThirdCity(districtData[value][0]);
+    setThirdCityList(zipCodeData[districtData[value][0]]);
+    setForthCity(zipCodeData[districtData[value][0]][0]);
+  };
+
+  const onThirdCityChange = (value) => {
+    setThirdCity(value);
+    setThirdCityList(zipCodeData[value]);
+    setForthCity(zipCodeData[value][0]);
+  };
+
+  const onForthCityChange = (value) => {
+    setForthCity(value);
+  };
+
   return (
     <div>
       <Container fluid>
@@ -57,7 +116,7 @@ function AddCustomer() {
                     tel: "",
                     location: "",
                     locationDeliver: "",
-                    email:""
+                    email: "",
                   }}
                   validationSchema={SignupSchema}
                   onSubmit={submitAdd}
@@ -148,14 +207,54 @@ function AddCustomer() {
                               value={values.email}
                             ></Form.Control>
                             {errors.tel && touched.tel ? (
-                              <span className="text-danger">{errors.email}</span>
+                              <span className="text-danger">
+                                {errors.email}
+                              </span>
                             ) : null}
                           </Form.Group>
                         </Col>
                       </Row>
                       <Row>
                         <Col md="6">
-                          <Form.Group>
+                          <Select
+                            defaultValue={provinceData[0]}
+                            style={{ width: 120 }}
+                            onChange={handleProvinceChange}
+                          >
+                            {provinceData.map((province) => (
+                              <Option key={province}>{province}</Option>
+                            ))}
+                          </Select>
+                          <Select
+                            style={{ width: 120 }}
+                            value={secondCity}
+                            onChange={onSecondCityChange}
+                          >
+                            {cities.map((city) => (
+                              <Option key={city}>{city}</Option>
+                            ))}
+                          </Select>
+                          <Select
+                            style={{ width: 120 }}
+                            value={thirdCity}
+                            onChange={onThirdCityChange}
+                          >
+                            {secondCityList.map((city) => (
+                              <Option key={city}>{city}</Option>
+                            ))}
+                          </Select>
+
+                          <Select
+                            style={{ width: 120 }}
+                            value={forthCity}
+                            onChange={onForthCityChange}
+                          >
+                            {thirdCityList.map((city) => (
+                              <Option key={city}>{city}</Option>
+                            ))}
+                          </Select>
+
+                          {/* <Form.Group>
                             <h5>ที่อยู่บริษัท</h5>
                             <Form.Control
                               type="text"
@@ -170,7 +269,7 @@ function AddCustomer() {
                                 {errors.location}
                               </span>
                             ) : null}
-                          </Form.Group>
+                          </Form.Group> */}
                         </Col>
                         <Col md="6">
                           <Form.Group>
