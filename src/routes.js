@@ -33,6 +33,7 @@ import AddProduction from "./views/production/add";
 import AddInvoice from "./views/invoice/add";
 import AddDelivery from "./views/delivery/add";
 import AddLogistic from "./views/logistic/add";
+import EditCustomer from "./views/customer/edit";
 
 const dashboardRoutes = [
   // {
@@ -96,6 +97,14 @@ const dashboardRoutes = [
     name: "สร้างลูกค้าใหม่",
     icon: "nc-icon nc-paper-2",
     component: AddCustomer,
+    layout: "/admin",
+    sidebar:false
+  },
+  {
+    path: "/editc/:id",
+    name: "เเก้ไขข้อมูลลูกค้า",
+    icon: "nc-icon nc-paper-2",
+    component: EditCustomer,
     layout: "/admin",
     sidebar:false
   },

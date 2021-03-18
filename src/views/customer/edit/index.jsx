@@ -1,31 +1,71 @@
-import React, { useState } from "react";
+import React, { useState , useEffect , useRef } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
-import { Formik } from "formik";
+import { useHistory , useParams } from "react-router-dom";
+import { useFormikContext , Formik } from "formik";
 import * as Yup from "yup";
-import { postJson } from "../../../axios";
+import {  putJson , getParam } from "../../../axios";
 import { message } from "antd";
 import AddressSelector from "../../../components/address";
 
-const addSchema = Yup.object().shape({
+const editSchema = Yup.object().shape({
   code: Yup.string().required("กรุณากรอกข้อมูล"),
   name: Yup.string().required("กรุณากรอกข้อมูล"),
   tel: Yup.string().required("กรุณากรอกข้อมูล"),
   email: Yup.string().required("กรุณากรอกข้อมูล")
 });
 
-function AddCustomer() {
+function EditCustomer() {
+
   let history = useHistory();
+  let { id } = useParams();
   const [billToId, setBillToId] = useState(1);
   const [shipToId, setShipToId] = useState(1);
   const [deliveryToId, setDeliveryToId] = useState(1);
   const [addDeliver, setAddDeliver] = useState(false);
+  const [info,setInfo] = useState({
+    billTo:{},
+    shipTo:{},
+    deliveryTo:{}
+  });
 
-  const submitAdd = async (values, { setSubmitting, resetForm }) => {
+   useEffect(async ()=> {
+
+    const res = await getParam(`/customer/info/${id}`);
+
+    if(res.status == 200){
+
+        const {cid, name , type , tel , email ,billToLocation , shipToLocation , deliveryLocation , billTo , shipTo , deliveryTo} = res.data.data;
+        setBillToId(res.data.data.billToLocationId);
+        setShipToId(res.data.data.shipToLocationId);
+        if(res.data.data.deliveryLocationId){
+          setDeliveryToId(res.data.deliveryLocationId);
+          setAddDeliver(true);
+        }
+        setInfo({
+          code:  cid ,
+          name: name,
+          type: type,
+          tel: tel,
+          shipToLocation: shipToLocation,
+          billToLocation: billToLocation,
+          deliveryToLocation: deliveryLocation,
+          email: email,
+          billTo : billTo,
+          shipTo : shipTo ,
+          deliveryTo : deliveryTo || {}
+        });
+
+    }else{
+      message.error("ไม่พบข้อมูล", 3);
+      history.push("/admin/user");
+    }
+
+   },[]);
+
+  const submitEdit = async (values, { setSubmitting, resetForm }) => {
 
     setSubmitting(true);
-    const response = await postJson("/customer/add", {
-      cid: values.code,
+    const response = await putJson(`/customer/update/${values.code}`, {
       name: values.name,
       type: values.type,
       tel: values.tel,
@@ -34,13 +74,13 @@ function AddCustomer() {
       billToLocation: values.billToLocation,
       shipToLocationId: shipToId,
       shipToLocation: values.shipToLocation,
-      deliveryLocationId: addDeliver? deliveryToId : "",
-      deliveryLocation: addDeliver? values.deliveryToLocation : "",
+      deliveryLocationId: addDeliver? deliveryToId : null,
+      deliveryLocation: addDeliver? values.deliveryToLocation : null,
     });
 
     if (response.status == 200) {
       setSubmitting(false);
-      message.success("เพิ่มข้อมูลสำเร็จ", 3);
+      message.success("เเก้ไขข้อมูลสำเร็จ", 3);
       history.push("/admin/user");
     } else {
       setSubmitting(false);
@@ -55,22 +95,23 @@ function AddCustomer() {
           <Col md="12">
             <Card>
               <Card.Header>
-                <Card.Title as="h4">สร้างลูกค้าใหม่</Card.Title>
+                <Card.Title as="h4">เเก้ไขข้อมูลลูกค้า</Card.Title>
               </Card.Header>
               <Card.Body>
                 <Formik
                   initialValues={{
-                    code: "",
-                    name: "",
-                    type: "INN",
-                    tel: "",
-                    shipToLocation: "",
-                    billToLocation: "",
-                    deliveryToLocation: "",
-                    email: "",
+                    code: info.code,
+                    name: info.name,
+                    type: info.type,
+                    tel: info.tel,
+                    shipToLocation: info.shipToLocation,
+                    billToLocation: info.billToLocation,
+                    deliveryToLocation: info.deliveryToLocation,
+                    email: info.email,
                   }}
-                  validationSchema={addSchema}
-                  onSubmit={submitAdd}
+                  enableReinitialize={true}
+                  validationSchema={editSchema}
+                  onSubmit={submitEdit}
                 >
                   {({
                     values,
@@ -92,6 +133,7 @@ function AddCustomer() {
                               name="code"
                               onChange={handleChange}
                               value={values.code}
+                              readOnly
                             ></Form.Control>
                             {errors.code && touched.code ? (
                               <span className="text-danger">{errors.code}</span>
@@ -170,6 +212,10 @@ function AddCustomer() {
                           <h5>ที่อยู่ตามการชำระเงิน</h5>
                           <AddressSelector
                             setAddressId={setBillToId}
+                            initProvince={info.billTo.province}
+                            initSubDistrict={info.billTo.subDistrict}
+                            initDistrict={info.billTo.district}
+                            initZipCode={info.billTo.zipCode}
                           ></AddressSelector>
                           <br></br>
                           <Form.Group>
@@ -188,6 +234,10 @@ function AddCustomer() {
                           <h5>ที่อยู่จัดส่ง</h5>
                           <AddressSelector
                             setAddressId={setShipToId}
+                            initProvince={info.shipTo.province}
+                            initSubDistrict={info.shipTo.subDistrict}
+                            initDistrict={info.shipTo.district}
+                            initZipCode={info.shipTo.zipCode}
                           ></AddressSelector>
                           <br></br>
                           <Form.Group>
@@ -232,6 +282,10 @@ function AddCustomer() {
                             <>
                               <AddressSelector
                                 setAddressId={setDeliveryToId}
+                                initProvince={info.deliveryTo.province}
+                                initSubDistrict={info.deliveryTo.subDistrict}
+                                initDistrict={info.deliveryTo.district}
+                                initZipCode={info.deliveryTo.zipCode}
                               ></AddressSelector>
                               <br></br>
                               <Form.Group>
@@ -259,7 +313,7 @@ function AddCustomer() {
                             disabled={isSubmitting}
                           >
                             <i className="far fa-plus-square mr-1"></i>
-                            เพิ่มลูกค้าใหม่
+                            เเก้ไขข้อมูลลูกค้า
                           </Button>
                         </Col>
                       </Row>
@@ -276,4 +330,4 @@ function AddCustomer() {
   );
 }
 
-export default AddCustomer;
+export default EditCustomer;
