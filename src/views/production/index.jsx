@@ -18,7 +18,7 @@ function Production() {
   const [search, setSearch] = useState({
     sCode: "",
     sName: "",
-    sType: "",
+    sStatus: "",
   });
 
   const submitSearch = (values, { setSubmitting, resetForm }) => {
@@ -27,7 +27,7 @@ function Production() {
       ...search,
       sCode: values.code,
       sName: values.name,
-      sType: values.type,
+      sStatus: values.status,
     });
     setSubmitting(false);
   };
@@ -46,7 +46,7 @@ function Production() {
                   initialValues={{
                     code: "",
                     name: "",
-                    type: "",
+                    status: "",
                   }}
                   onSubmit={submitSearch}
                 >
@@ -88,15 +88,23 @@ function Production() {
                             ></Form.Control>
                           </Form.Group>
                         </Col>
-                        {/* <Col md="6">
+                        <Col md="4">
                           <Form.Group>
-                            <h5>ชื่อพนักงานขาย</h5>
+                            <h5>สถานะรายการ</h5>
                             <Form.Control
-                              placeholder="ชื่อพนักงานขาย"
                               type="text"
-                            ></Form.Control>
+                              size="sm"
+                              as="select"
+                              name="status"
+                              onChange={handleChange}
+                              value={values.status}
+                            >
+                              <option value="">ทั้งหมด</option>
+                              <option value="waiting">ชำระเงินยังไม่ครบ</option>
+                              <option value="success">ชำระเงินครบเเล้ว</option>
+                            </Form.Control>
                           </Form.Group>
-                        </Col> */}
+                        </Col>
                       </Row>
                       <Row>
                         <Col md="3" lg="2">
@@ -121,7 +129,7 @@ function Production() {
                                 ...search,
                                 sCode: "",
                                 sName: "",
-                                sType: "",
+                                sStatus: "",
                               });
                             }}
                           >
@@ -154,6 +162,7 @@ function Production() {
             <TableProduction
               sCode={search.sCode}
               sName={search.sName}
+              sStatus={search.sStatus}
             ></TableProduction>
           </Col>
         </Row>

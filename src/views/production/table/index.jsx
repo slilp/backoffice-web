@@ -5,14 +5,14 @@ import { getParam } from "../../../axios";
 import { columns } from "./column";
 import { searchData } from "./service";
 
-function TableProduction({ sCode, sName, sType }) {
+function TableProduction({ sCode, sName, sStatus }) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
   const columnsTable = columns;
   const reloadData = searchData;
 
   useEffect(async () => {
-    const res = await reloadData({ sCode, sName, sType }, 0, 10);
+    const res = await reloadData({ sCode, sName, sStatus }, 0, 10);
     setDataSource(res.list);
     setPagination({
       total: res.total - 1,
@@ -20,11 +20,11 @@ function TableProduction({ sCode, sName, sType }) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sCode, sName, sType]);
+  }, [sCode, sName, sStatus]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(
-      { sCode, sName, sType },
+      { sCode, sName, sStatus },
       pagination.current - 1,
       pagination.pageSize
     );

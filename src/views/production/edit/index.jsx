@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { Table, Container, Row, Col, Card, Form,Button} from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import {
+  Table,
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+} from "react-bootstrap";
+import { useHistory, useParams } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { postJson } from "../../../axios";
+import { putJson } from "../../../axios";
 import { Modal, message, Radio } from "antd";
-import { searchCustomer, getAllSaleList } from "./service";
+import { searchCustomer, getAllSaleList } from "../add/service";
 import FixAddressSelector from "../../../components/fixAddress";
 import AddressSelector from "../../../components/address";
 import FindCustomer from "../../findCustomer";
+import {getParam} from "../../../axios";
 
-const AddSchema = Yup.object().shape({
-  code: Yup.string().required("กรุณากรอกข้อมูล"),
-  sale: Yup.string().required("กรุณากรอกข้อมูล"),
+const EditSchema = Yup.object().shape({
   cid: Yup.string().required("กรุณากรอกข้อมูล"),
   cname: Yup.string().required("กรุณากรอกข้อมูล"),
 });
 
-function AddProduction() {
+function EditProduction() {
   let history = useHistory();
+  let { id } = useParams();
   const [customer, setCustomer] = useState({
-    shipTo : {}
+    shipTo: {},
   });
-  const [transaction, setTransaction] = useState({revenue:0});
+  const [transaction, setTransaction] = useState({ revenue: 0 });
   const [saleList, setSaleList] = useState([{}]);
   const [openOption, setOpenOption] = useState(false);
   const [transportType, setTransportType] = useState("self");
-  const [selectTrans, setSelectTrans] = useState({});
   const [shipToId, setShipToId] = useState(1);
   const [deliverToId, setDeliverToId] = useState(1);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,25 +41,66 @@ function AddProduction() {
   useEffect(async () => {
     const sales = await getAllSaleList();
     setSaleList(sales);
+
+    const res = await getParam(`/purchase/info/${id}`);
+
+    if (res.status == 200) {
+      const {
+        pid,
+        sid,
+        transportType,
+        transportName,
+        transportLocationId,
+        transportLocation,
+        note,
+        revenue,
+        customerInfo,
+        transportInfo
+       
+      } = res.data.data;
+
+      setShipToId(transportLocationId);
+      setTransportType(transportType);
+      setTransaction({
+        pid : pid ,
+        revenue:revenue,
+        note: note ,
+        transportName : transportName,
+        sid : sid
+      });
+      setCustomer({
+        name: customerInfo.name,
+        cid : customerInfo.cid,
+        deliveryLocation : transportLocation,
+        shipToLocation : customerInfo.shipToLocation,
+        shipTo : customerInfo.shipTo,
+        deliverTo :  transportInfo
+      }
+      )
+      if(transportType == "transporter")   setOpenOption(!openOption);
+
+    } else {
+      message.error("ไม่พบข้อมูล", 3);
+      history.push("/admin/production");
+    }
   }, []);
 
-  const submitAdd = async (values, { setSubmitting, resetForm }) => {
+  const submitEdit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
-    const response = await postJson("/purchase/add", {
-      pid: values.code,
+    const response = await putJson(`/purchase/update/${values.code}`, {
       revenue: values.revenue,
       sid: values.sale,
       cid: values.cid,
-      transportLocationId : transportType == "self" ? null  : deliverToId,
-      transportLocation : transportType == "self" ? null  : values.transportLocation,
-      transportType : transportType ,
-      transportName : transportType == "self" ? null  : values.transportName, 
-      note : values.note
+      transportLocationId: transportType == "self" ? null : deliverToId,
+      transportLocation: transportType == "self" ? null : values.transportLocation,
+      transportType: transportType,
+      transportName: transportType == "self" ? null : values.transportName,
+      note: values.note,
     });
 
     if (response.status == 200) {
       setSubmitting(false);
-      message.success("เพิ่มข้อมูลสำเร็จ", 3);
+      message.success("เเก้ไขข้อมูลสำเร็จ", 3);
       history.push("/admin/production");
     } else {
       setSubmitting(false);
@@ -60,7 +108,7 @@ function AddProduction() {
     }
   };
 
-  const showModal = () => setIsModalVisible(true) ;
+  const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
 
   const handleOk = async (id) => {
@@ -86,19 +134,19 @@ function AddProduction() {
               <Card.Body>
                 <Formik
                   initialValues={{
-                    code: transaction.cid,
+                    code: transaction.pid,
                     name: "",
-                    sale: 1,
+                    sale: transaction.sid,
                     revenue: transaction.revenue,
                     cname: customer.name,
                     cid: customer.cid,
                     transportLocation: customer.deliveryLocation,
                     shipToLocation: customer.shipToLocation,
-                    transportName : "",
-                    note: ""
+                    transportName: transaction.transportName,
+                    note: transaction.note,
                   }}
-                  validationSchema={AddSchema}
-                  onSubmit={submitAdd}
+                  validationSchema={EditSchema}
+                  onSubmit={submitEdit}
                   enableReinitialize={true}
                 >
                   {({
@@ -122,15 +170,16 @@ function AddProduction() {
                               placeholder="SOxxxxxxx"
                               type="text"
                               name="code"
-                              onChange={(e)=>{
-                                setTransaction({...transaction , cid:e.target.value});
+                              onChange={(e) => {
+                                setTransaction({
+                                  ...transaction,
+                                  cid: e.target.value,
+                                });
                                 handleChange(e);
                               }}
                               value={values.code}
+                              readOnly
                             ></Form.Control>
-                            {errors.code && touched.code ? (
-                              <span className="text-danger">{errors.code}</span>
-                            ) : null}
                           </Form.Group>
                         </Col>
                       </Row>
@@ -219,8 +268,11 @@ function AddProduction() {
                               placeholder="100xxx"
                               type="number"
                               name="revenue"
-                              onChange={(e)=>{
-                                setTransaction({...transaction , revenue:e.target.value});
+                              onChange={(e) => {
+                                setTransaction({
+                                  ...transaction,
+                                  revenue: e.target.value,
+                                });
                                 handleChange(e);
                               }}
                               value={values.revenue}
@@ -237,9 +289,10 @@ function AddProduction() {
                       <h5>วิธีการจัดส่ง</h5>
 
                       <Radio.Group
-                        defaultValue="self"
+                        value={transportType}
                         onChange={selectTransport}
                         size="large"
+                        
                       >
                         <Radio.Button value="self">จัดส่งเอง</Radio.Button>
                         <Radio.Button value="transporter">
@@ -315,11 +368,27 @@ function AddProduction() {
                               <h5>ที่อยู่ขนส่ง</h5>
                               <Form.Group>
                                 <AddressSelector
-                                   setAddressId={setDeliverToId}
-                                   initProvince={customer.deliveryTo?customer.deliveryTo.province:null}
-                                   initSubDistrict={customer.deliveryTo?customer.deliveryTo.subDistrict:null}
-                                   initDistrict={customer.deliveryTo?customer.deliveryTo.district:null}
-                                   initZipCode={customer.deliveryTo?customer.deliveryTo.zipCode:null}
+                                  setAddressId={setDeliverToId}
+                                  initProvince={
+                                    customer.deliveryTo
+                                      ? customer.deliveryTo.province
+                                      : null
+                                  }
+                                  initSubDistrict={
+                                    customer.deliveryTo
+                                      ? customer.deliveryTo.subDistrict
+                                      : null
+                                  }
+                                  initDistrict={
+                                    customer.deliveryTo
+                                      ? customer.deliveryTo.district
+                                      : null
+                                  }
+                                  initZipCode={
+                                    customer.deliveryTo
+                                      ? customer.deliveryTo.zipCode
+                                      : null
+                                  }
                                 ></AddressSelector>
                                 <br></br>
                                 <Form.Control
@@ -347,7 +416,7 @@ function AddProduction() {
                             disabled={isSubmitting}
                           >
                             <i className="far fa-plus-square mr-1"></i>
-                            เพิ่มรายการสั่งซื้อ
+                            เเก้ไขรายการสั่งซื้อ
                           </Button>
                         </Col>
                       </Row>
@@ -374,4 +443,4 @@ function AddProduction() {
   );
 }
 
-export default AddProduction;
+export default EditProduction;
