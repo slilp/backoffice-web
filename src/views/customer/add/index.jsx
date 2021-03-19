@@ -34,8 +34,8 @@ function AddCustomer() {
       billToLocation: values.billToLocation,
       shipToLocationId: shipToId,
       shipToLocation: values.shipToLocation,
-      deliveryLocationId: addDeliver? deliveryToId : "",
-      deliveryLocation: addDeliver? values.deliveryToLocation : "",
+      deliveryLocationId: addDeliver? deliveryToId : null,
+      deliveryLocation: addDeliver? values.deliveryToLocation : null,
     });
 
     if (response.status == 200) {

@@ -74,7 +74,7 @@ const dashboardRoutes = [
     icon: "nc-icon nc-bus-front-12",
     component: Delivery,
     layout: "/admin",
-    sidebar:true
+    sidebar:false
   },
   {
     path: "/invoice",

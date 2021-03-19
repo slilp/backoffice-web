@@ -30,7 +30,7 @@ const addressCode = {
   100204: 6,
 };
 
-function AddressSelector({
+function FixAddressSelector({
   setAddressId,
   initProvince,
   initSubDistrict,
@@ -108,6 +108,7 @@ function AddressSelector({
         style={{ width: 250 }}
         value={selectedProvince}
         onChange={handleProvinceChange}
+        disabled
       >
         {provinceData.map((province) => (
           <Option
@@ -126,6 +127,7 @@ function AddressSelector({
         style={{ width: 250 }}
         value={selectedDistrict}
         onChange={handleDistrictChange}
+        disabled
       >
         {cities.map((city) => (
           <Option
@@ -144,6 +146,7 @@ function AddressSelector({
         style={{ width: 250 }}
         value={selectedSubDistrict}
         onChange={handleSubDistrictChange}
+        disabled
       >
         {districts.map((city) => (
           <Option
@@ -162,6 +165,7 @@ function AddressSelector({
         style={{ width: 250 }}
         value={selectedZipCode}
         onChange={handleZipCodeChange}
+        disabled
       >
         {subDistricts.map((city) => (
           <Option
@@ -177,4 +181,4 @@ function AddressSelector({
   );
 }
 
-export default AddressSelector;
+export default FixAddressSelector;
