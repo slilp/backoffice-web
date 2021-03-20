@@ -56,7 +56,7 @@ function Invoice() {
                 <Row>
                   <Col xs="5">
                     <div className="icon-big text-center icon-warning">
-                      <i className="nc-icon nc-credit-card text-warning"></i>
+                      <i className="nc-icon nc-money-coins text-warning"></i>
                     </div>
                   </Col>
                   <Col xs="7">

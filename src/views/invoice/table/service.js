@@ -1,6 +1,6 @@
 import { getParam } from "../../../axios";
 
-export const searchData =  async (search, page, size) => {
+export const searchData =  async (search, page, size , handle) => {
     const res = await getParam(`/invoice/search/${page}/${size}/`, {
       inv: search.sInv || "",
       pid: search.sPid || "",
@@ -19,7 +19,7 @@ export const searchData =  async (search, page, size) => {
             name:  item.purchaseInfo.customerInfo.name,
             amount: item.amount ,
             status: item.status == "waiting" ? "รอการชำระเงิน" : "ชำระเงินเเล้ว",
-            edit: "เเก้ไข",
+            edit: `./editi/${item.inv}`
           };
         });
   

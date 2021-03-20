@@ -49,10 +49,12 @@ export const columns = [
     dataIndex: "edit",
     key: "edit",
     width: 20,
-    render: (text) => (
+    render: (func) => ( 
+      <a className="d-inline-block" href={func}>
       <Button variant="primary" size="sm" className="font-kanit">
         เเก้ไข
       </Button>
+      </a>
     ),
   },
 ];

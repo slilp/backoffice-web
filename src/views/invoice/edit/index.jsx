@@ -1,48 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { postJson, getParam } from "../../../axios";
 import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
-import FindPurchase from "../../findPurchase";
-import { getBalance } from "./service";
 
-const searchTransaction = async (search) => {
-  const res = await getParam(`/purchase/search/0/1`, {
-    pid: search || "",
-  });
-
-  if (res.status == 200) {
-    if (res.data.data.count != 0) {
-      return res.data.data.rows[0];
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
-
-function AddInvoice() {
+function EditInvoice() {
   let history = useHistory();
+  let { id } = useParams();
   const [payDate, setPayDate] = useState(moment(new Date(), "DD/MM/YYYY"));
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [transaction, setTransaction] = useState({});
-  const [purchaseInfo, setPurchaseInfo] = useState({ balance: 0 });
+  const [purchaseInfo, setPurchaseInfo] = useState({});
+  const [invoiceStatus,setInvoiceStatus] = useState("waiting");
 
-  const AddSchema = Yup.object().shape({
-    code: Yup.string().required("กรุณากรอกข้อมูล"),
-    pid: Yup.string().required("กรุณากรอกข้อมูล"),
-    revenue: Yup.number().test(
-      "เกินจำนวนเงินคงเหลือที่ต้องชำระ",
-      "เกินจำนวนเงินคงเหลือที่ต้องชำระ",
-      (value) => value <= purchaseInfo.balance
-    ),
-  });
+  useEffect(async () => {
+    const invoiceInfo = await getParam(`/invoice/search/0/1`, {
+      inv: id,
+    });
 
-  const submitAdd = async (values, { setSubmitting, resetForm }) => {
+    if (invoiceInfo.status == 200) {
+      const {
+        inv,
+        pid,
+        amount,
+        invoiceDate,
+        status,
+        purchaseInfo,
+      } = invoiceInfo.data.data.rows[0];
+
+      setPurchaseInfo({
+        inv: inv,
+        pid: id,
+        payType: purchaseInfo.payType,
+        cname: purchaseInfo.customerInfo.name,
+        cid: purchaseInfo.customerInfo.cid,
+        revenue: amount      
+      });
+      setInvoiceStatus(status);
+      setPayDate(invoiceDate);
+    } else {
+      message.error("ไม่พบข้อมูล", 3);
+      history.push("/admin/invoice");
+    }
+  }, []);
+
+  const submitEdit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     const response = await postJson("/invoice/add", {
       inv: values.code.trim(),
@@ -90,20 +93,6 @@ function AddInvoice() {
     formatLong: {},
   };
 
-  const showModal = () => setIsModalVisible(true);
-  const handleCancel = () => setIsModalVisible(false);
-
-  const handleOk = async (id, customerInfo) => {
-    const balance = await getBalance(id);
-    setPurchaseInfo({
-      cid: customerInfo.cid,
-      cname: customerInfo.name,
-      balance: balance,
-      pid: id,
-    });
-    setIsModalVisible(false);
-  };
-
   return (
     <>
       <Container fluid>
@@ -111,21 +100,19 @@ function AddInvoice() {
           <Col md="12">
             <Card>
               <Card.Header>
-                <Card.Title as="h4">สร้างรายการใบเสร็จเเละการจัดส่ง</Card.Title>
+                <Card.Title as="h4">เเก้ไขข้อมูลใบเสร็จ</Card.Title>
               </Card.Header>
               <Card.Body>
                 <Formik
                   initialValues={{
-                    code: transaction.inv,
+                    code: purchaseInfo.inv,
                     pid: purchaseInfo.pid,
-                    payType: "cash",
+                    payType: purchaseInfo.payType,
                     cname: purchaseInfo.cname,
                     cid: purchaseInfo.cid,
-                    revenue: 0,
-                    waitingRevenue: purchaseInfo.balance,
+                    revenue: purchaseInfo.revenue,
                   }}
-                  validationSchema={AddSchema}
-                  onSubmit={submitAdd}
+                  onSubmit={submitEdit}
                   enableReinitialize={true}
                 >
                   {({
@@ -147,29 +134,14 @@ function AddInvoice() {
                               placeholder="INVxxxxx"
                               type="text"
                               name="code"
-                              onChange={(e)=> { setTransaction({inv:e.target.value})  ;handleChange(e); } }
+                              onChange={handleChange}
                               value={values.code}
+                              readOnly
                             ></Form.Control>
                             {errors.code && touched.code ? (
                               <span className="text-danger">{errors.code}</span>
                             ) : null}
                           </Form.Group>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col md="6">
-                          <Button
-                            type="button"
-                            variant="info"
-                            size="sm"
-                            className="m-2"
-                            onClick={showModal}
-                          >
-                            <i class="fas fa-search-plus ml-1"></i>
-                            <span className="ml-1 h5 font-kanit">
-                              ค้นหารหัสการสั่งซื่อ
-                            </span>
-                          </Button>
                         </Col>
                       </Row>
                       <Row>
@@ -241,6 +213,7 @@ function AddInvoice() {
                               name="revenue"
                               onChange={handleChange}
                               value={values.revenue}
+                              readOnly
                             ></Form.Control>
                           </Form.Group>
                           {errors.revenue && touched.revenue ? (
@@ -248,18 +221,6 @@ function AddInvoice() {
                               {errors.revenue}
                             </span>
                           ) : null}
-                        </Col>
-                        <Col md="6">
-                          <Form.Group>
-                            <h5>จำนวนเงินคงเหลือที่ต้องชำระ</h5>
-                            <Form.Control
-                              type="number"
-                              name="waitingRevenue"
-                              onChange={handleChange}
-                              value={values.waitingRevenue}
-                              readOnly
-                            ></Form.Control>
-                          </Form.Group>
                         </Col>
                       </Row>
                       <Row>
@@ -281,6 +242,22 @@ function AddInvoice() {
                             </Radio.Group>
                           </Form.Group>
                         </Col>
+                        <Col md="6">
+                          <Form.Group>
+                            <h5>สถานะการชำระเงิน</h5>
+                            <Radio.Group
+                              size="large"
+                              name="status"
+                              onChange={(e)=>setInvoiceStatus(e.target.value)}
+                              value={invoiceStatus}
+                            >
+                              <Radio.Button value="waiting">ยังไม่ชำระ</Radio.Button>
+                              <Radio.Button value="success">
+                                ชำระเรียบร้อย
+                              </Radio.Button>
+                            </Radio.Group>
+                          </Form.Group>
+                        </Col>
                       </Row>
                       <Row className="justify-content-center">
                         <Col md="4" lg="2">
@@ -291,7 +268,7 @@ function AddInvoice() {
                             variant="success"
                           >
                             <i className="far fa-plus-square mr-1"></i>
-                            เพิ่มรายการ
+                            เเก้ไขรายการ
                           </Button>
                         </Col>
                       </Row>
@@ -304,19 +281,8 @@ function AddInvoice() {
           </Col>
         </Row>
       </Container>
-      <Modal
-        title="ค้นหารายการ"
-        visible={isModalVisible}
-        className="font-kanit"
-        onCancel={handleCancel}
-        cancelText={"ยกเลิก"}
-        okButtonProps={{ style: { display: "none" } }}
-        width={800}
-      >
-        <FindPurchase handleModal={handleOk}></FindPurchase>
-      </Modal>
     </>
   );
 }
 
-export default AddInvoice;
+export default EditInvoice;

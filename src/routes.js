@@ -35,6 +35,7 @@ import AddDelivery from "./views/delivery/add";
 import AddLogistic from "./views/logistic/add";
 import EditCustomer from "./views/customer/edit";
 import EditPurchase from "./views/production/edit";
+import EditInvoice from "./views/invoice/edit";
 
 const dashboardRoutes = [
   // {
@@ -106,6 +107,14 @@ const dashboardRoutes = [
     name: "เเก้ไขข้อมูลลูกค้า",
     icon: "nc-icon nc-paper-2",
     component: EditCustomer,
+    layout: "/admin",
+    sidebar:false
+  },
+  {
+    path: "/editi/:id",
+    name: "เเก้ไขข้อการชำระเงิน",
+    icon: "nc-icon nc-paper-2",
+    component: EditInvoice,
     layout: "/admin",
     sidebar:false
   },

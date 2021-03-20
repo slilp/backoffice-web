@@ -12,13 +12,12 @@ import TableProduction from "./table";
 import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
 
-function Production() {
+function FindPurchase({ handleModal }) {
   let history = useHistory();
 
   const [search, setSearch] = useState({
     sCode: "",
     sName: "",
-    sStatus: "",
   });
 
   const submitSearch = (values, { setSubmitting, resetForm }) => {
@@ -27,7 +26,6 @@ function Production() {
       ...search,
       sCode: values.code,
       sName: values.name,
-      sStatus: values.status,
     });
     setSubmitting(false);
   };
@@ -36,50 +34,13 @@ function Production() {
     <div>
       <Container fluid>
         <Row>
-          <Col lg="3" sm="6">
-            <Card className="card-stats">
-              <Card.Body>
-                <Row>
-                  <Col xs="5">
-                    <div className="icon-big text-center icon-info">
-                      <i className="nc-icon nc-credit-card text-info"></i>
-                    </div>
-                  </Col>
-                  <Col xs="7">
-                    <div className="numbers">
-                      <p className="card-category font-kanit">รอชำระเงิน</p>
-                      <Card.Title as="h4">
-                        5 รายการ
-                        {/* {waitingAmount
-                          .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} */}
-                      </Card.Title>
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-              <Card.Footer>
-                <hr></hr>
-                <div className="stats">
-                  <i className="far fa-calendar-alt mr-1"></i>
-                  อัพเดท
-                </div>
-              </Card.Footer>
-            </Card>
-          </Col>
-        </Row>
-        <Row>
           <Col md="12">
             <Card>
-              <Card.Header>
-                <Card.Title as="h4">ค้นหารายการสั่งซื้อ</Card.Title>
-              </Card.Header>
               <Card.Body>
                 <Formik
                   initialValues={{
                     code: "",
-                    name: "",
-                    status: "",
+                    name: ""
                   }}
                   onSubmit={submitSearch}
                 >
@@ -121,26 +82,9 @@ function Production() {
                             ></Form.Control>
                           </Form.Group>
                         </Col>
-                        <Col md="4">
-                          <Form.Group>
-                            <h5>สถานะรายการ</h5>
-                            <Form.Control
-                              type="text"
-                              size="sm"
-                              as="select"
-                              name="status"
-                              onChange={handleChange}
-                              value={values.status}
-                            >
-                              <option value="">ทั้งหมด</option>
-                              <option value="waiting">ชำระเงินยังไม่ครบ</option>
-                              <option value="success">ชำระเงินครบเเล้ว</option>
-                            </Form.Control>
-                          </Form.Group>
-                        </Col>
                       </Row>
                       <Row>
-                        <Col md="3" lg="2">
+                        <Col md="6">
                           <br></br>
                           <Button
                             className="btn-fill pull-right"
@@ -151,7 +95,7 @@ function Production() {
                             ค้นหารายการ
                           </Button>
                         </Col>
-                        <Col md="3" lg="2">
+                        <Col md="6">
                           <br></br>
                           <Button
                             className="btn-fill pull-right"
@@ -170,20 +114,7 @@ function Production() {
                             ล้างการค้นหา
                           </Button>
                         </Col>
-                        <Col md="3" lg="2">
-                          <br></br>
-                          <Button
-                            className="btn-fill pull-right"
-                            type="submit"
-                            variant="warning"
-                            onClick={() => history.push("/admin/addp")}
-                          >
-                            <i className="far fa-plus-square mr-1"></i>
-                            เพิ่มรายการสั่งซื้อ
-                          </Button>
-                        </Col>
                       </Row>
-
                       <div className="clearfix"></div>
                     </Form>
                   )}
@@ -195,7 +126,7 @@ function Production() {
             <TableProduction
               sCode={search.sCode}
               sName={search.sName}
-              sStatus={search.sStatus}
+              handleSelect={handleModal}
             ></TableProduction>
           </Col>
         </Row>
@@ -204,4 +135,4 @@ function Production() {
   );
 }
 
-export default Production;
+export default FindPurchase;
