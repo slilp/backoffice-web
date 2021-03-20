@@ -8,13 +8,15 @@ import { searchData } from "./service";
 function TableInvoice({ sInv, sPid, sStatus, sStartDate, sEndDate }) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
+  const [refresh,setRefresh] =useState(false);
   const reloadData = searchData;
 
   useEffect(async () => {
     const res = await reloadData(
       { sInv, sPid, sStatus, sStartDate, sEndDate },
       0,
-      10
+      10,
+      setRefresh
     );
     setDataSource(res.list);
     setPagination({
@@ -23,13 +25,14 @@ function TableInvoice({ sInv, sPid, sStatus, sStartDate, sEndDate }) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sPid, sInv, sStatus, sStartDate, sEndDate]);
+  }, [sPid, sInv, sStatus, sStartDate, sEndDate, refresh]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(
       { sInv, sPid, sStatus, sStartDate, sEndDate },
       pagination.current - 1,
-      pagination.pageSize
+      pagination.pageSize,
+      setRefresh
     );
     setDataSource(res.list);
     setPagination({

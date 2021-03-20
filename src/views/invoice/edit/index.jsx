@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useHistory, useParams } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { postJson, getParam } from "../../../axios";
+import { putJson, getParam } from "../../../axios";
 import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
 
@@ -15,9 +15,7 @@ function EditInvoice() {
   const [invoiceStatus,setInvoiceStatus] = useState("waiting");
 
   useEffect(async () => {
-    const invoiceInfo = await getParam(`/invoice/search/0/1`, {
-      inv: id,
-    });
+    const invoiceInfo = await getParam(`/invoice/info/${id}`, {});
 
     if (invoiceInfo.status == 200) {
       const {
@@ -27,15 +25,16 @@ function EditInvoice() {
         invoiceDate,
         status,
         purchaseInfo,
-      } = invoiceInfo.data.data.rows[0];
-
+        channel
+      } = invoiceInfo.data.data;
       setPurchaseInfo({
         inv: inv,
-        pid: id,
+        pid: purchaseInfo.pid,
         payType: purchaseInfo.payType,
         cname: purchaseInfo.customerInfo.name,
         cid: purchaseInfo.customerInfo.cid,
-        revenue: amount      
+        revenue: amount,
+        channel: channel 
       });
       setInvoiceStatus(status);
       setPayDate(invoiceDate);
@@ -47,17 +46,18 @@ function EditInvoice() {
 
   const submitEdit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
-    const response = await postJson("/invoice/add", {
-      inv: values.code.trim(),
+    const response = await putJson(`/invoice/update/${values.code.trim()}`, {
       pid: values.pid.trim(),
       invoiceDate: payDate,
       amount: values.revenue,
-      channel: values.payType,
+      channel: purchaseInfo.channel,
+      status: invoiceStatus,
+      images: "45444"
     });
 
     if (response.status == 200) {
       setSubmitting(false);
-      message.success("เพิ่มข้อมูลสำเร็จ", 3);
+      message.success("เเก้ไขข้อมูลสำเร็จ", 3);
       history.push("/admin/invoice");
     } else {
       setSubmitting(false);
@@ -230,9 +230,8 @@ function EditInvoice() {
                             <Radio.Group
                               defaultValue="cash"
                               size="large"
-                              name="paymentType"
-                              onChange={handleChange}
-                              value={values.paymentType}
+                              onChange={(e)=>setPurchaseInfo({...purchaseInfo,channel:e.target.value})}
+                              value={purchaseInfo.channel}
                             >
                               <Radio.Button value="cash">เงินสด</Radio.Button>
                               <Radio.Button value="credit">

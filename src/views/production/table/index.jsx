@@ -8,11 +8,12 @@ import { searchData } from "./service";
 function TableProduction({ sCode, sName, sStatus }) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
+  const [refresh,setRefresh] = useState(false);
   const columnsTable = columns;
   const reloadData = searchData;
 
   useEffect(async () => {
-    const res = await reloadData({ sCode, sName, sStatus }, 0, 10);
+    const res = await reloadData({ sCode, sName, sStatus }, 0, 10 , setRefresh);
     setDataSource(res.list);
     setPagination({
       total: res.total - 1,
@@ -20,13 +21,14 @@ function TableProduction({ sCode, sName, sStatus }) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sCode, sName, sStatus]);
+  }, [sCode, sName, sStatus,refresh]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(
       { sCode, sName, sStatus },
       pagination.current - 1,
-      pagination.pageSize
+      pagination.pageSize ,
+      setRefresh
     );
     setDataSource(res.list);
     setPagination({

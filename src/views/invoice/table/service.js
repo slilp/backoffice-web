@@ -1,6 +1,11 @@
-import { getParam } from "../../../axios";
+import { getParam , deleteAxios} from "../../../axios";
 
-export const searchData =  async (search, page, size , handle) => {
+async function deleteInvoice(inv , setRefresh){
+    const del = await deleteAxios(`/invoice/delete/${inv}`,{});
+    setRefresh(value => !value);
+}
+
+export const searchData =  async (search, page, size , setRefresh) => {
     const res = await getParam(`/invoice/search/${page}/${size}/`, {
       inv: search.sInv || "",
       pid: search.sPid || "",
@@ -19,7 +24,8 @@ export const searchData =  async (search, page, size , handle) => {
             name:  item.purchaseInfo.customerInfo.name,
             amount: item.amount ,
             status: item.status == "waiting" ? "รอการชำระเงิน" : "ชำระเงินเเล้ว",
-            edit: `./editi/${item.inv}`
+            edit: `./editi/${item.inv}`,
+            deleteInv: async ()=> {await deleteInvoice(item.inv , setRefresh)}
           };
         });
   

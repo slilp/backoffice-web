@@ -7,11 +7,12 @@ import { searchData } from "./service";
 function TableCustomer({ sCode, sName, sType }) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
+  const [refresh,setRefresh] =useState(false);
   const columnsTable = columns;
   const reloadData = searchData;
   
   useEffect(async () => {
-    const res = await reloadData({sCode,sName,sType},0, 10);
+    const res = await reloadData({sCode,sName,sType},0, 10 , setRefresh);
     setDataSource(res.list);
     setPagination({
       total: res.total - 1,
@@ -19,13 +20,14 @@ function TableCustomer({ sCode, sName, sType }) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sCode,sName,sType]);
+  }, [sCode,sName,sType,refresh]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(
       { sCode, sName, sType },
       pagination.current - 1,
-      pagination.pageSize
+      pagination.pageSize,
+      setRefresh
     );
     setDataSource(res.list);
     setPagination({

@@ -49,4 +49,15 @@ export const columns = [
         </a>
       ),
     },
+    {
+        title: "ลบ",
+        dataIndex: "deleteC",
+        key: "deleteC",
+        width: 20,
+        render: (func) => ( 
+          <Button variant="danger" onClick={func} size="sm" className="font-kanit">
+            ลบข้อมูล
+          </Button>
+        ),
+    },
 ];

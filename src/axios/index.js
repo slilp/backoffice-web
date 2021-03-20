@@ -42,6 +42,20 @@ async function putJson(url, req) {
     }
 }
 
+async function deleteAxios(url, req) {
+
+    try {
+        const res = await axios.delete(API_URL + url, {
+            params: req
+        });
+
+        return res;
+
+    } catch (error) {
+        return error.response;
+    }
+}
+
 async function getParam(url, req) {
 
     try {
@@ -60,5 +74,6 @@ async function getParam(url, req) {
 export {
     postJson,
     getParam,
-    putJson
+    putJson,
+    deleteAxios
 }

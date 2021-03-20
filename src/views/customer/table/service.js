@@ -1,6 +1,12 @@
-import { getParam } from "../../../axios";
+import { getParam , deleteAxios} from "../../../axios";
 
-export const searchData = async (search, page, size) => {
+
+async function deleteCustomer(cid , setRefresh){
+    const del = await deleteAxios(`/customer/delete/${cid}`,{});
+    setRefresh(value => !value);
+}
+
+export const searchData = async (search, page, size , setRefresh) => {
 
     const res = await getParam(`/customer/search/${page}/${size}/`, {
       name: search.sName || '',
@@ -18,7 +24,8 @@ export const searchData = async (search, page, size) => {
             location: `${item.billToLocation} ${item.billTo.subDistrict} ${item.billTo.district} ${item.billTo.province} ${item.billTo.zipCode}` ,
             tel: item.tel,
             type: item.type,
-            edit: `./editc/${item.cid}`
+            edit: `./editc/${item.cid}`,
+            deleteC: async ()=> {await deleteCustomer(item.cid , setRefresh)}
           };
         });
   

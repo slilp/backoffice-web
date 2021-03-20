@@ -63,4 +63,15 @@ export const columns = [
       </a>
     ),
   },
+  {
+    title: "ลบข้อมูล",
+    dataIndex: "deletePid",
+    key: "deletePid",
+    width: 20,
+    render: (func) => ( 
+      <Button variant="danger" onClick={func} size="sm" className="font-kanit">
+        ลบข้อมูล
+      </Button>
+    ),
+  },
 ];
