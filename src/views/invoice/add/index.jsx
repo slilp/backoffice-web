@@ -9,21 +9,6 @@ import { message, DatePicker, Modal, Radio } from "antd";
 import FindPurchase from "../../findPurchase";
 import { getBalance } from "./service";
 
-const searchTransaction = async (search) => {
-  const res = await getParam(`/purchase/search/0/1`, {
-    pid: search || "",
-  });
-
-  if (res.status == 200) {
-    if (res.data.data.count != 0) {
-      return res.data.data.rows[0];
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
 
 function AddInvoice() {
   let history = useHistory();
