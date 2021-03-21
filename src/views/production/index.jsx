@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import {
   Table,
   Container,
@@ -11,15 +11,22 @@ import {
 import TableProduction from "./table";
 import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
+import {getParam} from "../../axios"
 
 function Production() {
   let history = useHistory();
+  const [waitingCount,setWaitingCount] = useState(0);
 
   const [search, setSearch] = useState({
     sCode: "",
     sName: "",
     sStatus: "",
   });
+
+  useEffect(async ()=>{
+    const response  = await getParam("/purchase/count/waiting");
+    setWaitingCount(response.data.data);
+  },[]);  
 
   const submitSearch = (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
@@ -47,13 +54,14 @@ function Production() {
                   </Col>
                   <Col xs="7">
                     <div className="numbers">
-                      <p className="card-category font-kanit">รอชำระเงิน</p>
+                      <p className="card-category font-kanit">รอสร้างรายการชำระเงิน</p>
                       <Card.Title as="h4">
-                        5 รายการ
-                        {/* {waitingAmount
+                        {waitingCount
                           .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} */}
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          <span className="ml-1">รายการ</span>
                       </Card.Title>
+                    
                     </div>
                   </Col>
                 </Row>
