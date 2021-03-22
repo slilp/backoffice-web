@@ -38,7 +38,6 @@ function AddLogistic() {
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     const response = await postJson("/logistic/add", {
-      lid : "2",
       inv: values.inv.trim(),
       tid: values.tid,
       deliveryDate: payDate,

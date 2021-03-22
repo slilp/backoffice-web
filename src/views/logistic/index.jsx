@@ -17,6 +17,7 @@ import { getParam } from "../../axios";
 function Logistic() {
   let history = useHistory();
   const [transporterList, setTransporterList] = useState([{}]);
+  const [waitingDeliver,setWaitingDeliver] = useState(0);
   const [search, setSearch] = useState({
     sInv: "",
     sTid: "",
@@ -24,11 +25,12 @@ function Logistic() {
   });
 
   useEffect(async () => {
-
     const transporters = await getParam("/transporter/all",{});
-
+    const waitingTrans  = await getParam("/logistic/count/waiting");
+    setWaitingDeliver(waitingTrans.data.data);
     setTransporterList(transporters.data.data);
   }, []);
+
 
   const submitSearch = (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
@@ -59,7 +61,7 @@ function Logistic() {
                   <Col xs="7">
                     <div className="numbers">
                       <p className="card-category font-kanit">รายการรอส่ง</p>
-                      <Card.Title as="h4">5 รายการ</Card.Title>
+                      <Card.Title as="h4">{waitingDeliver} รายการ</Card.Title>
                     </div>
                   </Col>
                 </Row>
