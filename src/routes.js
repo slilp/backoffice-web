@@ -36,6 +36,7 @@ import AddLogistic from "./views/logistic/add";
 import EditCustomer from "./views/customer/edit";
 import EditPurchase from "./views/production/edit";
 import EditInvoice from "./views/invoice/edit";
+import EditLogistic from "./views/logistic/edit";
 
 const dashboardRoutes = [
   // {
@@ -107,6 +108,14 @@ const dashboardRoutes = [
     name: "เเก้ไขข้อมูลลูกค้า",
     icon: "nc-icon nc-paper-2",
     component: EditCustomer,
+    layout: "/admin",
+    sidebar:false
+  },
+  {
+    path: "/editl/:id",
+    name: "เเก้ไขข้อมูลการขอส่ง",
+    icon: "nc-icon nc-paper-2",
+    component: EditLogistic,
     layout: "/admin",
     sidebar:false
   },

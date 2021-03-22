@@ -8,7 +8,7 @@ async function getAllTransporterList(){
         return res.data.data;
     } else {
       return [{}];
-    }
+    }        
 }
 
 
