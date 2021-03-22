@@ -7,6 +7,9 @@ import { postJson } from "../../../axios";
 import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
 import { getAllTransporterList } from "./service";
+import AddressSelector from "../../../components/fixAddress";
+import FindInvoice from "../../findInvoice";
+import { getParam } from "../../../axios";
 
 const AddSchema = Yup.object().shape({
   inv: Yup.string().required("กรุณากรอกข้อมูล"),
@@ -14,12 +17,18 @@ const AddSchema = Yup.object().shape({
 
 function AddLogistic() {
   let history = useHistory();
-  const [deliveryDate, setDeliveryPayDate] = useState(
-    moment(new Date(), "DD/MM/YYYY")
-  );
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [payDate, setPayDate] = useState(moment(new Date(), "DD/MM/YYYY"));
   const [logisticInfo, setLogisticInfo] = useState({});
   const [transporterList, setTransporterList] = useState([{}]);
+  const [deliveryType, setDeliveryType] = useState(false);
+  const [purchaseInfo, setPurchaseInfo] = useState({
+    transportInfo:{}
+  });
+  const [customerInfo, setCustomerInfo] = useState({
+    billTo: {},
+    shipTo: {},
+  });
 
   useEffect(async () => {
     const transporters = await getAllTransporterList();
@@ -29,8 +38,9 @@ function AddLogistic() {
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     const response = await postJson("/logistic/add", {
+      lid : "2",
       inv: values.inv.trim(),
-      tid: values.tid.trim(),
+      tid: values.tid,
       deliveryDate: payDate,
     });
 
@@ -45,7 +55,7 @@ function AddLogistic() {
   };
 
   function onChange(date, dateString) {
-    setDeliveryPayDate(dateString);
+    setPayDate(dateString);
   }
 
   const months = [
@@ -75,18 +85,37 @@ function AddLogistic() {
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
 
-  const handleOk = async (id, invoiceInfo) => {
-    // setLogisticInfo({
-    //   cid: customerInfo.cid,
-    //   cname: customerInfo.name,
-    //   balance: balance,
-    //   pid: id,
-    // });
+  const handleOk = async (id, customerId, purchaseId) => {
+    const customerInfo = await getParam(`/customer/info/${customerId}`);
+    const { cid, name, type, tel, email, billToLocation, shipToLocation, deliveryLocation, billTo, shipTo, deliveryTo} = customerInfo.data.data;
+    const purchaseInfo = await getParam(`/purchase/info/${purchaseId}`);
+    const {
+      transportType, transportLocation, note, transportInfo
+    } = purchaseInfo.data.data;
+    setLogisticInfo({inv:id});
+    if(transportType == "transporter"){
+      setPurchaseInfo({
+        transportLocation : transportLocation,
+        transportInfo : transportInfo
+      });
+      setDeliveryType(true);
+    } 
+    setCustomerInfo({
+      cid : cid,
+      cname: name,
+      type: type,
+      tel: tel,
+      shipToLocation: shipToLocation,
+      billToLocation: billToLocation,
+      email: email,
+      billTo: billTo,
+      shipTo: shipTo
+    });
     setIsModalVisible(false);
   };
 
   return (
-    <div>
+    <>
       <Container fluid>
         <Row>
           <Col md="12">
@@ -98,7 +127,12 @@ function AddLogistic() {
                 <Formik
                   initialValues={{
                     inv: logisticInfo.inv,
-                    tid: logisticInfo.tid,
+                    tid: 1,
+                    cid : customerInfo.cid,
+                    cname : customerInfo.cname,
+                    shipToLocation : customerInfo.shipToLocation ,
+                    billToLocation :customerInfo.billToLocation ,
+                    transportLocation : purchaseInfo.transportLocation
                   }}
                   validationSchema={AddSchema}
                   onSubmit={submitAdd}
@@ -143,6 +177,9 @@ function AddLogistic() {
                               type="text"
                               readOnly
                             ></Form.Control>
+                            {errors.inv && touched.inv ? (
+                              <span className="text-danger">{errors.inv}</span>
+                            ) : null}
                           </Form.Group>
                         </Col>
                       </Row>
@@ -150,10 +187,13 @@ function AddLogistic() {
                         <Col md="6">
                           <Form.Group>
                             <h5>กำหนดการส่งสินค้า</h5>
-                            <Form.Control
-                              placeholder="06-03-2020 13:00"
-                              type="text"
-                            ></Form.Control>
+                            <DatePicker
+                              size="large"
+                              defaultValue={moment(new Date())}
+                              // format={"DD/MM/YYYY"}
+                              locale={locale}
+                              onChange={onChange}
+                            />
                           </Form.Group>
                         </Col>
                         <Col md="6">
@@ -161,7 +201,7 @@ function AddLogistic() {
                           <Form.Group>
                             <Form.Control
                               type="text"
-                              name="sale"
+                              name="tid"
                               size="sm"
                               as="select"
                               onChange={handleChange}
@@ -176,6 +216,109 @@ function AddLogistic() {
                           </Form.Group>
                         </Col>
                       </Row>
+                      <Row>
+                        <Col md="6">
+                          <Form.Group>
+                            <h5>ชื่อลูกค้า</h5>
+                            <Form.Control
+                              placeholder="ชื่อลูกค้า"
+                              type="text"
+                              name="cname"
+                              onChange={handleChange}
+                              value={values.cname}
+                              readOnly
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                        <Col md="6">
+                          <Form.Group>
+                            <h5>รหัสลูกค้า</h5>
+                            <Form.Control
+                              placeholder="รหัสลูกค้า"
+                              type="text"
+                              name="cid"
+                              onChange={handleChange}
+                              value={values.cid}
+                              readOnly
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md="6">
+                          <h5>ที่อยู่ตามการชำระเงิน</h5>
+                          <AddressSelector
+                            initProvince={customerInfo.billTo.province}
+                            initSubDistrict={customerInfo.billTo.subDistrict}
+                            initDistrict={customerInfo.billTo.district}
+                            initZipCode={customerInfo.billTo.zipCode}
+                          ></AddressSelector>
+                          <br></br>
+                          <Form.Group>
+                            <Form.Control
+                              type="text"
+                              as="textarea"
+                              rows={3}
+                              name="billToLocation"
+                              maxLength="500"
+                              onChange={handleChange}
+                              value={values.billToLocation}
+                              readOnly
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                        <Col md="6">
+                          <h5>ที่อยู่จัดส่ง</h5>
+                          <AddressSelector
+                            initProvince={customerInfo.shipTo.province}
+                            initSubDistrict={customerInfo.shipTo.subDistrict}
+                            initDistrict={customerInfo.shipTo.district}
+                            initZipCode={customerInfo.shipTo.zipCode}
+                          ></AddressSelector>
+                          <br></br>
+                          <Form.Group>
+                            <Form.Control
+                              type="text"
+                              as="textarea"
+                              rows={3}
+                              name="shipToLocation"
+                              maxLength="500"
+                              onChange={handleChange}
+                              value={values.shipToLocation}
+                              readOnly
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md="6">
+                          {deliveryType && (
+                            <>
+                              <h5>ที่อยู่สำหรับขนส่ง</h5>
+                              <AddressSelector
+                                initSubDistrict={
+                                  purchaseInfo.transportInfo.subDistrict
+                                }
+                                initDistrict={ purchaseInfo.transportInfo.district}
+                                initZipCode={ purchaseInfo.transportInfo.zipCode}
+                              ></AddressSelector>
+                              <br></br>
+                              <Form.Group>
+                                <Form.Control
+                                  type="text"
+                                  as="textarea"
+                                  rows={3}
+                                  name="transportLocation"
+                                  maxLength="500"
+                                  onChange={handleChange}
+                                  value={values.transportLocation}
+                                  readOnly
+                                ></Form.Control>
+                              </Form.Group>
+                            </>
+                          )}
+                        </Col>
+                      </Row>
                       <Row className="justify-content-center">
                         <Col md="4" lg="2">
                           <br></br>
@@ -183,7 +326,6 @@ function AddLogistic() {
                             className="btn-fill"
                             type="submit"
                             variant="success"
-                            onClick={() => history.push("/admin/logistic")}
                           >
                             <i className="far fa-plus-square mr-1"></i>
                             เพิ่มรายการ
@@ -199,7 +341,18 @@ function AddLogistic() {
           </Col>
         </Row>
       </Container>
-    </div>
+      <Modal
+        title="ค้นหารายการ"
+        visible={isModalVisible}
+        className="font-kanit"
+        onCancel={handleCancel}
+        cancelText={"ยกเลิก"}
+        okButtonProps={{ style: { display: "none" } }}
+        width={800}
+      >
+        <FindInvoice handleModal={handleOk}></FindInvoice>
+      </Modal>
+    </>
   );
 }
 

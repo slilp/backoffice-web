@@ -71,7 +71,7 @@ function Logistic() {
                       <Form.Group>
                         <h5>สถานะการขนส่ง</h5>
                         <Form.Control type="text" size="sm" as="select">
-                           <option>ทั้งหมด</option>
+                          <option>ทั้งหมด</option>
                           <option>รอการจัดส่ง</option>
                           <option>ส่งช้าเกินกำหนด</option>
                           <option>ขนส่งสำเร็จเเล้ว</option>
@@ -80,22 +80,23 @@ function Logistic() {
                     </Col>
                   </Row>
                   <Row>
-                    <Col md="5">
+                    <Col md="6">
+                      <h5>พนักงานขาย</h5>
                       <Form.Group>
-                        <h5>จัดส่งจากวันที่</h5>
                         <Form.Control
-                          placeholder="27-02-2021"
                           type="text"
-                        ></Form.Control>
-                      </Form.Group>
-                    </Col>
-                    <Col md="5">
-                      <Form.Group>
-                        <h5>จัดส่งถึงวันที่</h5>
-                        <Form.Control
-                          placeholder="10-03-2021"
-                          type="text"
-                        ></Form.Control>
+                          name="sale"
+                          size="sm"
+                          as="select"
+                          onChange={handleChange}
+                          value={values.sale}
+                        >
+                          {saleList.map((v) => (
+                            <option value={v.sid}>
+                              {v.title} {v.firstName} {v.lastName}
+                            </option>
+                          ))}
+                        </Form.Control>
                       </Form.Group>
                     </Col>
                   </Row>
