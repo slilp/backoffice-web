@@ -5,7 +5,7 @@ import { getParam } from "../../../axios";
 import { columns } from "./column";
 import { searchData } from "./service";
 
-function TableLogistic({ sInv, sStatus, sTid }) {
+function TableLogistic({ sInv , sPid, sStatus, sTid }) {
 
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
@@ -14,7 +14,7 @@ function TableLogistic({ sInv, sStatus, sTid }) {
 
   useEffect(async () => {
     const res = await reloadData(
-      { sInv, sTid, sStatus },
+      { sInv ,sPid , sTid, sStatus },
       0,
       10,
       setRefresh
@@ -26,11 +26,11 @@ function TableLogistic({ sInv, sStatus, sTid }) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sInv, sTid, sStatus, refresh]);
+  }, [sInv, sPid, sTid, sStatus, refresh]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(
-      { sInv, sTid, sStatus },
+      { sInv, sPid, sTid, sStatus },
       pagination.current - 1,
       pagination.pageSize,
       setRefresh

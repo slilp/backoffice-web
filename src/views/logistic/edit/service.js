@@ -2,9 +2,9 @@ import { getParam , putJson } from "../../../axios";
 
 export async function getLogisticInfo(lid){
     const logisticInfo = await getParam(`/logistic/search/0/10?lid=${lid}`);
-    const customerId = logisticInfo.data.data.rows[0].invoiceInfo.purchaseInfo.customerInfo.cid;
-    const purchaseId = logisticInfo.data.data.rows[0].invoiceInfo.purchaseInfo.pid;
-    const invoiceId = logisticInfo.data.data.rows[0].invoiceInfo.inv;
+    const customerId = logisticInfo.data.data.rows[0].purchaseInfo.customerInfo.cid;
+    const purchaseId = logisticInfo.data.data.rows[0].purchaseInfo.pid;
+    const invoiceId = logisticInfo.data.data.rows[0].inv || "";
     const transporterId = logisticInfo.data.data.rows[0].transporterInfo.tid;
 
     return {
@@ -12,7 +12,9 @@ export async function getLogisticInfo(lid){
         customerId : customerId,
         purchaseId : purchaseId,
         invoiceId : invoiceId,
-        transporterId : transporterId
+        transporterId : transporterId,
+        deliveryDate : logisticInfo.data.data.rows[0].deliveryDate ,
+        status : logisticInfo.data.data.rows[0].status ,
     }
 }
 
@@ -36,7 +38,8 @@ export async function getPurchaseInfo(pid){
 export async function editLogisticTrans(request){
     const response = await putJson(`/logistic/update/${request.lid}`, {
         deliveryDate: request.deliveryDate,
-        status: request.logisticStatus
+        status: request.logisticStatus,
+        inv : request.inv
     });
     return response;
 }

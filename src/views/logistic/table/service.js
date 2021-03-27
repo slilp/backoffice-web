@@ -8,9 +8,17 @@ async function deleteLogistic(lid, setRefresh) {
   setRefresh(value => !value);
 }
 
+const statusWord = {
+  waiting : "รอการขนส่ง",
+  late: "เกินเวลาขนส่ง",
+  cancel : "ยกเลิกการขนส่ง",
+  success : "ขนส่งเรียบร้อย"
+}
+
 export const searchData = async (search, page, size, setRefresh) => {
   const res = await getParam(`/logistic/search/${page}/${size}/`, {
     inv: search.sInv || "",
+    pid : search.sPid || "",
     status: search.sStatus || "",
     tid: search.sTid || ""
   });
@@ -19,12 +27,12 @@ export const searchData = async (search, page, size, setRefresh) => {
       let data = res.data.data.rows.map((item) => {
         return {
           key: item.lid,
-          inv: item.invoiceInfo.inv,
-          pid: item.invoiceInfo.purchaseInfo.pid,
+          inv: item.inv || '-',
+          pid: item.purchaseInfo.pid,
           tname: item.transporterInfo.firstName + ' ' + item.transporterInfo.lastName,
-          name: item.invoiceInfo.purchaseInfo.customerInfo.name,
-          type: item.invoiceInfo.purchaseInfo.purchaseInfo == 'self' ? 'จัดส่งเอง' : 'โดยขนส่ง',
-          status: item.status == "waiting" ? "รอการขนส่ง" : "ขนส่งเเล้ว",
+          name: item.purchaseInfo.customerInfo.name,
+          type: item.purchaseInfo.purchaseInfo == 'self' ? 'จัดส่งเอง' : 'โดยขนส่ง',
+          status: statusWord[item.status],
           edit: `./editl/${item.lid}`,
           deleteInv: async () => {
             await deleteLogistic(item.lid, setRefresh)

@@ -24,8 +24,6 @@ export const searchData = async (search, page, size, handle) => {
           amount: item.amount,
           edit: {
             inv: item.inv,
-            cid : item.purchaseInfo.customerInfo.cid,
-            pid : item.pid,
             func: handle
           }
         };

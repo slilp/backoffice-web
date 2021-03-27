@@ -37,7 +37,7 @@ export const columns = [
     dataIndex: "edit",
     key: "edit",
     render: (value) => ( 
-      <Button variant="primary" onClick={()=> value.func(value.inv , value.cid , value.pid)}  size="sm" className="font-kanit">
+      <Button variant="primary" onClick={()=> value.func(value.inv)}  size="sm" className="font-kanit">
         เลือก
       </Button>
     ),

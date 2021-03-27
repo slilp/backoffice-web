@@ -5,12 +5,20 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
-import { getLogisticInfo , getTransporterList , getCustomerInfo , getPurchaseInfo , editLogisticTrans} from "./service" ;
+import {
+  getLogisticInfo,
+  getTransporterList,
+  getCustomerInfo,
+  getPurchaseInfo,
+  editLogisticTrans,
+} from "./service";
 import AddressSelector from "../../../components/fixAddress";
+import FindInvoice from "../../findInvoice";
 
 function EditLogistic() {
   let history = useHistory();
   let { id } = useParams();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [payDate, setPayDate] = useState(moment(new Date(), "DD/MM/YYYY"));
   const [logisticInfo, setLogisticInfo] = useState({});
   const [transporterList, setTransporterList] = useState([{}]);
@@ -25,11 +33,28 @@ function EditLogistic() {
   });
 
   useEffect(async () => {
-    const {logisticInfo , customerId , purchaseId , invoiceId , transporterId}= await getLogisticInfo(id);
+    const {
+      logisticInfo,
+      status,
+      deliveryDate,
+      customerId,
+      purchaseId,
+      invoiceId,
+      transporterId,
+    } = await getLogisticInfo(id);
     const transporters = await getTransporterList();
     setTransporterList(transporters);
     const customerInfo = await getCustomerInfo(customerId);
-    const { cid, name, type, tel, email, billToLocation, shipToLocation, billTo, shipTo,
+    const {
+      cid,
+      name,
+      type,
+      tel,
+      email,
+      billToLocation,
+      shipToLocation,
+      billTo,
+      shipTo,
     } = customerInfo;
     const purchaseInfo = await getPurchaseInfo(purchaseId);
     const {
@@ -39,7 +64,8 @@ function EditLogistic() {
       transportInfo,
     } = purchaseInfo;
     setLogisticInfo({ inv: invoiceId, tid: transporterId });
-
+    setLogisticStatus(status);
+    setPayDate(deliveryDate);
     if (transportType == "transporter") {
       setPurchaseInfo({
         transportLocation: transportLocation,
@@ -63,11 +89,11 @@ function EditLogistic() {
 
   const submitEdit = async (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
-    console.log(logisticStatus);
     const response = await editLogisticTrans({
-      lid : id,
+      lid: id,
+      inv: logisticInfo.inv,
       deliveryDate: payDate,
-      logisticStatus: logisticStatus
+      logisticStatus: logisticStatus,
     });
 
     if (response.status == 200) {
@@ -106,6 +132,14 @@ function EditLogistic() {
       day: (n) => days[n],
     },
     formatLong: {},
+  };
+
+  const showModal = () => setIsModalVisible(true);
+  const handleCancel = () => setIsModalVisible(false);
+
+  const handleOk = async (invoiceId) => {
+    setLogisticInfo({ ...logisticInfo, inv: invoiceId });
+    setIsModalVisible(false);
   };
 
   return (
@@ -179,8 +213,10 @@ function EditLogistic() {
                                 </Col>
                                 <Col xs="7">
                                   <div className="numbers">
-                                    <Card.Title as="h5">ดาวน์โหลดข้อมูล</Card.Title>
-                                    <Button 
+                                    <Card.Title as="h5">
+                                      ดาวน์โหลดข้อมูล
+                                    </Card.Title>
+                                    <Button
                                       type="button"
                                       size="sm"
                                       variant="primary"
@@ -198,7 +234,6 @@ function EditLogistic() {
                           </Card>
                         </Col>
                       </Row>
-                      <h4>ข้อมูลการขนส่ง</h4>
                       <Row>
                         <Col md="6">
                           <Form.Group>
@@ -216,7 +251,22 @@ function EditLogistic() {
                             ) : null}
                           </Form.Group>
                         </Col>
+                        <Col md="6" className="mt-4">
+                          <Button
+                            type="button"
+                            variant="info"
+                            size="sm"
+                            className="m-2"
+                            onClick={showModal}
+                          >
+                            <i class="fas fa-search-plus ml-1"></i>
+                            <span className="ml-1 h5 font-kanit">
+                              ค้นหารายการ
+                            </span>
+                          </Button>
+                        </Col>
                       </Row>
+                      <h4>ข้อมูลการขนส่ง</h4>
                       <Row>
                         <Col md="6">
                           <Form.Group>
@@ -377,6 +427,17 @@ function EditLogistic() {
           </Col>
         </Row>
       </Container>
+      <Modal
+        title="ค้นหารายการ"
+        visible={isModalVisible}
+        className="font-kanit"
+        onCancel={handleCancel}
+        cancelText={"ยกเลิก"}
+        okButtonProps={{ style: { display: "none" } }}
+        width={800}
+      >
+        <FindInvoice handleModal={handleOk}></FindInvoice>
+      </Modal>
     </>
   );
 }

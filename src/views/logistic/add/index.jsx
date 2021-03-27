@@ -8,11 +8,12 @@ import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
 import { getAllTransporterList } from "./service";
 import AddressSelector from "../../../components/fixAddress";
-import FindInvoice from "../../findInvoice";
+import FindPurchase from "../../findPurchase";
+
 import { getParam } from "../../../axios";
 
 const AddSchema = Yup.object().shape({
-  inv: Yup.string().required("กรุณากรอกข้อมูล"),
+  pid: Yup.string().required("กรุณากรอกข้อมูล"),
 });
 
 function AddLogistic() {
@@ -36,9 +37,10 @@ function AddLogistic() {
   }, []);
 
   const submitAdd = async (values, { setSubmitting, resetForm }) => {
+    console.log('fdsfdsf');
     setSubmitting(true);
     const response = await postJson("/logistic/add", {
-      inv: values.inv.trim(),
+      pid: values.pid,
       tid: values.tid,
       deliveryDate: payDate,
     });
@@ -84,14 +86,14 @@ function AddLogistic() {
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
 
-  const handleOk = async (id, customerId, purchaseId) => {
-    const customerInfo = await getParam(`/customer/info/${customerId}`);
+  const handleOk = async (purchaseId, customer) => {
+    const customerInfo = await getParam(`/customer/info/${customer.cid}`);
     const { cid, name, type, tel, email, billToLocation, shipToLocation, deliveryLocation, billTo, shipTo, deliveryTo} = customerInfo.data.data;
     const purchaseInfo = await getParam(`/purchase/info/${purchaseId}`);
     const {
       transportType, transportLocation, note, transportInfo
     } = purchaseInfo.data.data;
-    setLogisticInfo({inv:id});
+    setLogisticInfo({pid:purchaseId});
     if(transportType == "transporter"){
       setPurchaseInfo({
         transportLocation : transportLocation,
@@ -125,8 +127,8 @@ function AddLogistic() {
               <Card.Body>
                 <Formik
                   initialValues={{
-                    inv: logisticInfo.inv,
                     tid: 1,
+                    pid:logisticInfo.pid,
                     cid : customerInfo.cid,
                     cname : customerInfo.cname,
                     shipToLocation : customerInfo.shipToLocation ,
@@ -167,17 +169,17 @@ function AddLogistic() {
                       <Row>
                         <Col md="6">
                           <Form.Group>
-                            <h5>รหัสใบเสร็จ</h5>
+                            <h5>รหัสใบสั่งซื้อ</h5>
                             <Form.Control
-                              placeholder="INVxxxxx"
-                              name="inv"
+                              placeholder="SOxxxxx"
+                              name="pid"
                               onChange={handleChange}
-                              value={values.inv}
+                              value={values.pid}
                               type="text"
                               readOnly
                             ></Form.Control>
-                            {errors.inv && touched.inv ? (
-                              <span className="text-danger">{errors.inv}</span>
+                            {errors.pid && touched.pid ? (
+                              <span className="text-danger">{errors.pid}</span>
                             ) : null}
                           </Form.Group>
                         </Col>
@@ -349,7 +351,7 @@ function AddLogistic() {
         okButtonProps={{ style: { display: "none" } }}
         width={800}
       >
-        <FindInvoice handleModal={handleOk}></FindInvoice>
+        <FindPurchase handleModal={handleOk}></FindPurchase>
       </Modal>
     </>
   );

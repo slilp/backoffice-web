@@ -1,4 +1,4 @@
-import React , {useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   Container,
@@ -17,32 +17,32 @@ import { getParam } from "../../axios";
 function Logistic() {
   let history = useHistory();
   const [transporterList, setTransporterList] = useState([{}]);
-  const [waitingDeliver,setWaitingDeliver] = useState(0);
+  const [waitingDeliver, setWaitingDeliver] = useState(0);
   const [search, setSearch] = useState({
     sInv: "",
+    sPid : "" ,
     sTid: "",
     sStatus: "",
   });
 
   useEffect(async () => {
-    const transporters = await getParam("/transporter/all",{});
-    const waitingTrans  = await getParam("/logistic/count/waiting");
+    const transporters = await getParam("/transporter/all", {});
+    const waitingTrans = await getParam("/logistic/count/waiting");
     setWaitingDeliver(waitingTrans.data.data);
     setTransporterList(transporters.data.data);
   }, []);
-
 
   const submitSearch = (values, { setSubmitting, resetForm }) => {
     setSubmitting(true);
     setSearch({
       ...search,
+      sPid: values.pid,
       sInv: values.inv,
       sTid: values.tid,
       sStatus: values.status,
     });
     setSubmitting(false);
   };
-
 
   return (
     <div>
@@ -87,7 +87,8 @@ function Logistic() {
                   initialValues={{
                     inv: "",
                     tid: "",
-                    status: ""
+                    status: "",
+                    pid: ""
                   }}
                   onSubmit={submitSearch}
                 >
@@ -105,6 +106,18 @@ function Logistic() {
                       <Row>
                         <Col md="5">
                           <Form.Group>
+                            <h5>รหัสใบสั่งซื้อ</h5>
+                            <Form.Control
+                              placeholder="SOxxxxx"
+                              type="text"
+                              name="pid"
+                              onChange={handleChange}
+                              value={values.pid}
+                            ></Form.Control>
+                          </Form.Group>
+                        </Col>
+                        <Col md="5">
+                          <Form.Group>
                             <h5>รหัสใบเสร็จ</h5>
                             <Form.Control
                               placeholder="INVxxxxx"
@@ -120,13 +133,13 @@ function Logistic() {
                         <Col md="5">
                           <Form.Group>
                             <h5>สถานะการขนส่ง</h5>
-                            <Form.Control 
-                            type="text" 
-                            size="sm"
-                            as="select"
-                            name="status"
-                            onChange={handleChange}
-                            value={values.status}
+                            <Form.Control
+                              type="text"
+                              size="sm"
+                              as="select"
+                              name="status"
+                              onChange={handleChange}
+                              value={values.status}
                             >
                               <option value="">ทั้งหมด</option>
                               <option value="waiting">รอการจัดส่ง</option>
@@ -182,6 +195,7 @@ function Logistic() {
                                 sInv: "",
                                 sTid: "",
                                 sStatus: "",
+                                sPid:""
                               });
                             }}
                           >
@@ -212,9 +226,10 @@ function Logistic() {
           </Col>
           <Col md="12">
             <TableLogistic
-             sInv={search.sInv}
-             sTid={search.sTid}
-             sStatus={search.sStatus}
+              sInv={search.sInv}
+              sTid={search.sTid}
+              sStatus={search.sStatus}
+              sPid={search.sPid}
             ></TableLogistic>
           </Col>
         </Row>
