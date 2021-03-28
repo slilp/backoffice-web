@@ -13,14 +13,16 @@ import { useHistory } from "react-router-dom";
 import Calendar from "./calendar";
 import { Formik } from "formik";
 import { getParam } from "../../axios";
+import moment from "moment";
 
 function Logistic() {
   let history = useHistory();
   const [transporterList, setTransporterList] = useState([{}]);
   const [waitingDeliver, setWaitingDeliver] = useState(0);
+  const [dateTransaction,setDateTransaction] = useState();
   const [search, setSearch] = useState({
     sInv: "",
-    sPid : "" ,
+    sPid: "",
     sTid: "",
     sStatus: "",
   });
@@ -28,6 +30,20 @@ function Logistic() {
   useEffect(async () => {
     const transporters = await getParam("/transporter/all", {});
     const waitingTrans = await getParam("/logistic/count/waiting");
+    const topHundredWaiting = await getParam(`/logistic/search/0/100`, {
+      status: 'waiting',
+    });
+    if (topHundredWaiting.status == 200) {
+      setDateTransaction(topHundredWaiting.data.data.rows.map((item)=>(
+       {
+        id : item.lid  ,
+        title : `${item.purchaseInfo.pid} ${item.purchaseInfo.customerInfo.name}` ,
+        date : moment(item.deliveryDate).format('YYYY-MM-DD') ,
+        url: `http://localhost:3000/admin/editl/${item.lid}`
+       }
+      )
+      ));
+    }
     setWaitingDeliver(waitingTrans.data.data);
     setTransporterList(transporters.data.data);
   }, []);
@@ -46,7 +62,6 @@ function Logistic() {
 
   return (
     <div>
-      {/* <Calendar></Calendar> */}
       <Container fluid>
         <Row>
           <Col lg="3" sm="6">
@@ -88,7 +103,7 @@ function Logistic() {
                     inv: "",
                     tid: "",
                     status: "",
-                    pid: ""
+                    pid: "",
                   }}
                   onSubmit={submitSearch}
                 >
@@ -195,7 +210,7 @@ function Logistic() {
                                 sInv: "",
                                 sTid: "",
                                 sStatus: "",
-                                sPid:""
+                                sPid: "",
                               });
                             }}
                           >
@@ -231,6 +246,14 @@ function Logistic() {
               sStatus={search.sStatus}
               sPid={search.sPid}
             ></TableLogistic>
+          </Col>
+        </Row>
+        <Row>
+          <Col className="bg-white m-3 p-3">
+            <h4 className="font-weight-light">รายการรอการจัดส่ง</h4>
+            <Calendar
+            dateInfoList={dateTransaction}
+            ></Calendar>
           </Col>
         </Row>
       </Container>

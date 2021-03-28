@@ -28,6 +28,7 @@ export const searchData = async (search, page, size, setRefresh) => {
         return {
           key: item.lid,
           inv: item.inv || '-',
+          pay:item.deliveryDate,
           pid: item.purchaseInfo.pid,
           tname: item.transporterInfo.firstName + ' ' + item.transporterInfo.lastName,
           name: item.purchaseInfo.customerInfo.name,
