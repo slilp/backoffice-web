@@ -14,6 +14,7 @@ import {
 } from "./service";
 import AddressSelector from "../../../components/fixAddress";
 import FindInvoice from "../../findInvoice";
+import Report from "./report";
 
 function EditLogistic() {
   let history = useHistory();
@@ -63,7 +64,7 @@ function EditLogistic() {
       note,
       transportInfo,
     } = purchaseInfo;
-    setLogisticInfo({ inv: invoiceId, tid: transporterId });
+    setLogisticInfo({ inv: invoiceId, tid: transporterId , pid : purchaseId});
     setLogisticStatus(status);
     setPayDate(deliveryDate);
     if (transportType == "transporter") {
@@ -216,14 +217,14 @@ function EditLogistic() {
                                     <Card.Title as="h5">
                                       ดาวน์โหลดข้อมูล
                                     </Card.Title>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="primary"
-                                    >
-                                      <i className="far fa-plus-square mr-1"></i>
-                                      ดาวน์โหลด
-                                    </Button>
+                                    <Report
+                                     purchaseId={logisticInfo.pid}
+                                     name={customerInfo.cname}
+                                     billTo={`${customerInfo.billToLocation} ${customerInfo.billTo.subDistrict} ${customerInfo.billTo.district} ${customerInfo.billTo.province} ${customerInfo.billTo.zipCode}`}
+                                     shipTo={`${customerInfo.shipToLocation} ${customerInfo.shipTo.subDistrict} ${customerInfo.shipTo.district} ${customerInfo.shipTo.province} ${customerInfo.shipTo.zipCode}`}
+                                     deliverTo={`${purchaseInfo.transportLocation} ${customerInfo.billTo.subDistrict} ${purchaseInfo.transportInfo.subDistrict} ${purchaseInfo.transportInfo.province} ${purchaseInfo.transportInfo.zipCode}`}
+                                     type={deliveryType}
+                                    ></Report>
                                   </div>
                                 </Col>
                               </Row>
