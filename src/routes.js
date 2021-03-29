@@ -26,6 +26,8 @@ import Upgrade from "views/Upgrade.js";
 import Production from "./views/production";
 import Invoice from "./views/invoice";
 import Customer from "./views/customer";
+import Sale from "./views/sale";
+import Transporter from "./views/transporter";
 import Delivery from "./views/delivery/";
 import Logistic from "./views/logistic";
 import AddCustomer from "./views/customer/add";
@@ -33,10 +35,13 @@ import AddProduction from "./views/production/add";
 import AddInvoice from "./views/invoice/add";
 import AddDelivery from "./views/delivery/add";
 import AddLogistic from "./views/logistic/add";
+import AddSale from "./views/sale/add";
+import AddTransporter from "./views/transporter/add";
 import EditCustomer from "./views/customer/edit";
 import EditPurchase from "./views/production/edit";
 import EditInvoice from "./views/invoice/edit";
 import EditLogistic from "./views/logistic/edit";
+
 
 const dashboardRoutes = [
   // {
@@ -60,6 +65,22 @@ const dashboardRoutes = [
     name: "ลูกค้า",
     icon: "nc-icon nc-circle-09",
     component: Customer,
+    layout: "/admin",
+    sidebar:true,
+  },
+  {
+    path: "/sale",
+    name: "พนักงานขาย",
+    icon: "nc-icon nc-circle-09",
+    component: Sale,
+    layout: "/admin",
+    sidebar:true,
+  },
+  {
+    path: "/transporter",
+    name: "พนักงานขนส่ง",
+    icon: "nc-icon nc-circle-09",
+    component: Transporter,
     layout: "/admin",
     sidebar:true,
   },
@@ -100,6 +121,22 @@ const dashboardRoutes = [
     name: "สร้างลูกค้าใหม่",
     icon: "nc-icon nc-paper-2",
     component: AddCustomer,
+    layout: "/admin",
+    sidebar:false
+  },
+  {
+    path: "/addt",
+    name: "สร้างพนักงานขนส่งใหม่",
+    icon: "nc-icon nc-paper-2",
+    component: AddTransporter,
+    layout: "/admin",
+    sidebar:false
+  },
+  {
+    path: "/adds",
+    name: "สร้างพนักงานขายใหม่",
+    icon: "nc-icon nc-paper-2",
+    component: AddSale,
     layout: "/admin",
     sidebar:false
   },
