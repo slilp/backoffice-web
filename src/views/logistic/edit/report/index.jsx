@@ -7,7 +7,7 @@ const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 
 
-function Report({ purchaseId , name , billTo , shipTo , deliverTo , type }) {
+function Report({ purchaseId , invoiceId , name , billTo , shipTo , deliverTo , type }) {
 
     const [exportData,setExportData] = useState([{columns:[{}],data:[[{}]]}]);
 
@@ -15,6 +15,7 @@ function Report({ purchaseId , name , billTo , shipTo , deliverTo , type }) {
         
         const exportResponse = [
             { value: purchaseId, style: {  alignment : {wrapText:true} } },
+            { value: invoiceId, style: { alignment : {wrapText:true} } },
             { value: name, style: { alignment : {wrapText:true} } },
             { value: billTo, style: { alignment : {wrapText:true}} },
             { value: shipTo, style: { alignment : {wrapText:true} } },
@@ -26,6 +27,7 @@ function Report({ purchaseId , name , billTo , shipTo , deliverTo , type }) {
             {
               columns: [
                 { title: "รหัสรายการ", width: { wpx: 80 } }, //pixels width
+                { title: "รหัสบิล", width: { wpx: 80 } }, //pixels width
                 { title: "ชื่อลูกค้า", width: { wpx: 200 } }, //pixels width
                 { title: "ที่อยู่ตามบิล", width: { wpx: 250 } }, //pixels width
                 { title: "ที่อยู่จัดส่ง", width: { wpx: 250 } }, //pixels width

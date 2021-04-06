@@ -224,6 +224,7 @@ function EditLogistic() {
                                      shipTo={`${customerInfo.shipToLocation} ${customerInfo.shipTo.subDistrict} ${customerInfo.shipTo.district} ${customerInfo.shipTo.province} ${customerInfo.shipTo.zipCode}`}
                                      deliverTo={`${purchaseInfo.transportLocation} ${customerInfo.billTo.subDistrict} ${purchaseInfo.transportInfo.subDistrict} ${purchaseInfo.transportInfo.province} ${purchaseInfo.transportInfo.zipCode}`}
                                      type={deliveryType}
+                                     invoiceId={logisticInfo.inv}
                                     ></Report>
                                   </div>
                                 </Col>
@@ -437,7 +438,9 @@ function EditLogistic() {
         okButtonProps={{ style: { display: "none" } }}
         width={800}
       >
-        <FindInvoice handleModal={handleOk}></FindInvoice>
+        <FindInvoice 
+        pid={logisticInfo.pid}
+        handleModal={handleOk}></FindInvoice>
       </Modal>
     </>
   );

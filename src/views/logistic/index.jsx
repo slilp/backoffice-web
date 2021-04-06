@@ -34,10 +34,11 @@ function Logistic() {
       status: 'waiting',
     });
     if (topHundredWaiting.status == 200) {
+      console.log(JSON.stringify(topHundredWaiting.data.data.rows));
       setDateTransaction(topHundredWaiting.data.data.rows.map((item)=>(
        {
         id : item.lid  ,
-        title : `${item.purchaseInfo.pid} ${item.purchaseInfo.customerInfo.name}` ,
+        title : `${item.purchaseInfo.pid} / ${item.inv || '-'} ${item.purchaseInfo.customerInfo.name}` ,
         date : moment(item.deliveryDate).format('YYYY-MM-DD') ,
         url: `http://localhost:3000/admin/editl/${item.lid}`
        }

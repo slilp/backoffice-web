@@ -9,16 +9,18 @@ import { message, DatePicker, Modal, Radio } from "antd";
 import { getAllTransporterList } from "./service";
 import AddressSelector from "../../../components/fixAddress";
 import FindPurchase from "../../findPurchase";
+import FindInvoice from "../../findInvoice";
 
 import { getParam } from "../../../axios";
 
 const AddSchema = Yup.object().shape({
-  pid: Yup.string().required("กรุณากรอกข้อมูล"),
+  pid: Yup.string().required("กรุณากรอกข้อมูล")
 });
 
 function AddLogistic() {
   let history = useHistory();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const [payDate, setPayDate] = useState(moment(new Date(), "DD/MM/YYYY"));
   const [logisticInfo, setLogisticInfo] = useState({});
   const [transporterList, setTransporterList] = useState([{}]);
@@ -42,6 +44,7 @@ function AddLogistic() {
     const response = await postJson("/logistic/add", {
       pid: values.pid,
       tid: values.tid,
+      inv: values.inv,
       deliveryDate: payDate,
     });
 
@@ -86,6 +89,9 @@ function AddLogistic() {
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
 
+  const showInvoiceModal = () => setIsInvoiceModalVisible(true);
+  const handleInvoiceCancel = () => setIsInvoiceModalVisible(false);
+
   const handleOk = async (purchaseId, customer) => {
     const customerInfo = await getParam(`/customer/info/${customer.cid}`);
     const { cid, name, type, tel, email, billToLocation, shipToLocation, deliveryLocation, billTo, shipTo, deliveryTo} = customerInfo.data.data;
@@ -115,6 +121,11 @@ function AddLogistic() {
     setIsModalVisible(false);
   };
 
+  const handleOkInvoice = async (invoiceId) => {
+    setLogisticInfo({...logisticInfo, inv: invoiceId });
+    setIsInvoiceModalVisible(false);
+  };
+
   return (
     <>
       <Container fluid>
@@ -127,8 +138,9 @@ function AddLogistic() {
               <Card.Body>
                 <Formik
                   initialValues={{
-                    tid: 1,
+                    tid: transporterList[0].tid,
                     pid:logisticInfo.pid,
+                    inv:logisticInfo.inv,
                     cid : customerInfo.cid,
                     cname : customerInfo.cname,
                     shipToLocation : customerInfo.shipToLocation ,
@@ -166,6 +178,7 @@ function AddLogistic() {
                           </Button>
                         </Col>
                       </Row>
+                      
                       <Row>
                         <Col md="6">
                           <Form.Group>
@@ -182,6 +195,38 @@ function AddLogistic() {
                               <span className="text-danger">{errors.pid}</span>
                             ) : null}
                           </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md="6">
+                          <Form.Group>
+                            <h5>รหัสใบเสร็จ</h5>
+                            <Form.Control
+                              placeholder="INVxxxxx"
+                              name="inv"
+                              onChange={handleChange}
+                              value={values.inv}
+                              type="text"
+                              readOnly
+                            ></Form.Control>
+                            {errors.inv && touched.inv ? (
+                              <span className="text-danger">{errors.inv}</span>
+                            ) : null}
+                          </Form.Group>
+                        </Col>
+                        <Col md="6" className="mt-4">
+                          <Button
+                            type="button"
+                            variant="info"
+                            size="sm"
+                            className="m-2"
+                            onClick={showInvoiceModal}
+                          >
+                            <i class="fas fa-search-plus ml-1"></i>
+                            <span className="ml-1 h5 font-kanit">
+                              ค้นหารายการ
+                            </span>
+                          </Button>
                         </Col>
                       </Row>
                       <Row>
@@ -353,6 +398,20 @@ function AddLogistic() {
       >
         <FindPurchase handleModal={handleOk}></FindPurchase>
       </Modal>
+      <Modal
+        title="ค้นหารายการ"
+        visible={isInvoiceModalVisible}
+        className="font-kanit"
+        onCancel={handleInvoiceCancel}
+        cancelText={"ยกเลิก"}
+        okButtonProps={{ style: { display: "none" } }}
+        width={800}
+      >
+        <FindInvoice 
+        pid={logisticInfo.pid}
+        handleModal={handleOkInvoice}></FindInvoice>
+      </Modal>
+
     </>
   );
 }

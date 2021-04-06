@@ -88,7 +88,7 @@ function AddProduction() {
                   initialValues={{
                     code: transaction.cid,
                     name: "",
-                    sale: 1,
+                    sale: saleList[0].sid,
                     revenue: transaction.revenue,
                     cname: customer.name,
                     cid: customer.cid,

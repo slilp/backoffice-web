@@ -5,15 +5,16 @@ import { getParam } from "../../../axios";
 import { columns } from "./column";
 import { searchData } from "./service";
 
-function TableInvoice({ sInv, sPid ,  handleSelect } ) {
+function TableInvoice({ sPid ,  handleSelect } ) {
   const [dataSource, setDataSource] = useState([]);
   const [pagination, setPagination] = useState();
   const [refresh,setRefresh] =useState(false);
   const reloadData = searchData;
 
   useEffect(async () => {
+    console.log('ddd');
     const res = await reloadData(
-      { sInv, sPid},
+      {sPid},
       0,
       10,
       handleSelect
@@ -25,7 +26,7 @@ function TableInvoice({ sInv, sPid ,  handleSelect } ) {
       indentSize: 10,
       showSizeChanger: false,
     });
-  }, [sPid, sInv, refresh]);
+  }, [sPid, refresh]);
 
   const handleTableChange = async (pagination, filters, sorter) => {
     const res = await reloadData(

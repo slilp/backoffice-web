@@ -6,7 +6,7 @@ import {
 export const searchData = async (search, page, size, handle) => {
   const res = await getParam(`/invoice/search/${page}/${size}/`, {
     inv: search.sInv || "",
-    pid: search.sPid || "",
+    pid: search.sPid || "notshow",
     status: search.sStatus || "",
     startDate: search.sStartDate || "",
     endDate: search.sEndDate || "",

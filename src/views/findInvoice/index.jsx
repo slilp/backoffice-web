@@ -13,23 +13,16 @@ import { useHistory } from "react-router-dom";
 import { Formik } from "formik";
 import { getParam } from "../../axios";
 
-function FindInvoice({handleModal}) {
+function FindInvoice({handleModal , pid}) {
   let history = useHistory();
 
   const [search, setSearch] = useState({
-    sInv: "",
-    sPid: ""
+    sPid: pid
   });
 
-  const submitSearch = (values, { setSubmitting, resetForm }) => {
-    setSubmitting(true);
-    setSearch({
-      ...search,
-      sInv: values.inv,
-      sPid: values.pid
-    });
-    setSubmitting(false);
-  };
+  useEffect(()=>{
+    setSearch({sPid:pid});
+  },[pid]);
 
   return (
     <div>
@@ -40,10 +33,9 @@ function FindInvoice({handleModal}) {
               <Card.Body>
                 <Formik
                   initialValues={{
-                    inv: "",
-                    pid: ""
+                    pid: pid
                   }}
-                  onSubmit={submitSearch}
+                  enableReinitialize={true}
                 >
                   {({
                     values,
@@ -55,20 +47,8 @@ function FindInvoice({handleModal}) {
                     isSubmitting,
                     resetForm,
                   }) => (
-                    <Form onSubmit={handleSubmit}>
+                    <Form>
                       <Row>
-                        <Col md="5">
-                          <Form.Group>
-                            <h5>รหัสใบเสร็จ</h5>
-                            <Form.Control
-                              placeholder="INVxxxxx"
-                              type="text"
-                              name="inv"
-                              onChange={handleChange}
-                              value={values.inv}
-                            ></Form.Control>
-                          </Form.Group>
-                        </Col>
                         <Col md="5">
                           <Form.Group>
                             <h5>รหัสการสั่งซื้อ</h5>
@@ -78,42 +58,9 @@ function FindInvoice({handleModal}) {
                               name="pid"
                               onChange={handleChange}
                               value={values.pid}
+                              readOnly
                             ></Form.Control>
                           </Form.Group>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col md="6">
-                          <br></br>
-                          <Button
-                            className="btn-fill pull-right"
-                            type="submit"
-                            variant="primary"
-                          >
-                            <i className="fas fa-search-plus mr-1"></i>
-                            ค้นหารายการ
-                          </Button>
-                        </Col>
-                        <Col md="6">
-                          <br></br>
-                          <Button
-                            className="btn-fill pull-right"
-                            variant="info"
-                            onClick={() => {
-                              resetForm();
-                              setSearch({
-                                ...search,
-                                sInv: "",
-                                sPid: "",
-                                sStatus: "",
-                                sStartDate: "",
-                                sEndDate: "",
-                              });
-                            }}
-                          >
-                            <i className="fas fa-reply mr-1"></i>
-                            ล้างการค้นหา
-                          </Button>
                         </Col>
                       </Row>
                       <div className="clearfix"></div>
@@ -125,7 +72,6 @@ function FindInvoice({handleModal}) {
           </Col>
           <Col md="12">
             <TableInvoice
-              sInv={search.sInv}
               sPid={search.sPid}
               handleSelect={handleModal}
             ></TableInvoice>
