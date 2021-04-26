@@ -6,13 +6,14 @@ import * as Yup from "yup";
 import { putJson, getParam } from "../../../axios";
 import moment from "moment";
 import { message, DatePicker, Modal, Radio } from "antd";
+import UploadImage from "../uploadImg";
 
 function EditInvoice() {
   let history = useHistory();
   let { id } = useParams();
   const [payDate, setPayDate] = useState(moment(new Date(), "DD/MM/YYYY"));
   const [purchaseInfo, setPurchaseInfo] = useState({});
-  const [invoiceStatus,setInvoiceStatus] = useState("waiting");
+  const [invoiceStatus, setInvoiceStatus] = useState("waiting");
 
   useEffect(async () => {
     const invoiceInfo = await getParam(`/invoice/info/${id}`, {});
@@ -25,7 +26,7 @@ function EditInvoice() {
         invoiceDate,
         status,
         purchaseInfo,
-        channel
+        channel,
       } = invoiceInfo.data.data;
       setPurchaseInfo({
         inv: inv,
@@ -34,7 +35,7 @@ function EditInvoice() {
         cname: purchaseInfo.customerInfo.name,
         cid: purchaseInfo.customerInfo.cid,
         revenue: amount,
-        channel: channel 
+        channel: channel,
       });
       setInvoiceStatus(status);
       setPayDate(invoiceDate);
@@ -52,7 +53,7 @@ function EditInvoice() {
       amount: values.revenue,
       channel: purchaseInfo.channel,
       status: invoiceStatus,
-      images: "45444"
+      images: "45444",
     });
 
     if (response.status == 200) {
@@ -92,6 +93,7 @@ function EditInvoice() {
     },
     formatLong: {},
   };
+
 
   return (
     <>
@@ -230,7 +232,12 @@ function EditInvoice() {
                             <Radio.Group
                               defaultValue="cash"
                               size="large"
-                              onChange={(e)=>setPurchaseInfo({...purchaseInfo,channel:e.target.value})}
+                              onChange={(e) =>
+                                setPurchaseInfo({
+                                  ...purchaseInfo,
+                                  channel: e.target.value,
+                                })
+                              }
                               value={purchaseInfo.channel}
                             >
                               <Radio.Button value="cash">เงินสด</Radio.Button>
@@ -247,15 +254,25 @@ function EditInvoice() {
                             <Radio.Group
                               size="large"
                               name="status"
-                              onChange={(e)=>setInvoiceStatus(e.target.value)}
+                              onChange={(e) => setInvoiceStatus(e.target.value)}
                               value={invoiceStatus}
                             >
-                              <Radio.Button value="waiting">ยังไม่ชำระ</Radio.Button>
+                              <Radio.Button value="waiting">
+                                ยังไม่ชำระ
+                              </Radio.Button>
                               <Radio.Button value="success">
                                 ชำระเรียบร้อย
                               </Radio.Button>
                             </Radio.Group>
                           </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md="6">
+                          <UploadImage
+                          inv={purchaseInfo.inv}
+                          >
+                          </UploadImage>
                         </Col>
                       </Row>
                       <Row className="justify-content-center">
